@@ -3,7 +3,7 @@ class BenchmarkSet:
         pass
     def setup(self):
         pass
-    def getDataSets(self):
+    def getDataLoader(self):
         pass
     def getAssociatedModel(self):
         pass
