@@ -1,4 +1,4 @@
-from config.loader import getOptim
+from config.loader import getOptim,getLRScheduler
 from models.cifar import CIFAR
 from models.demux import getBenmarkSet
 import torch
@@ -6,7 +6,7 @@ from utils.utils import AverageAggregator
 
 num_epochs = 25
 best_val_acc = 0.0
-def train(model, device, train_loader, optimizer, criterion):
+def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
     model.train()
 
     accuracy = AverageAggregator()
@@ -18,6 +18,7 @@ def train(model, device, train_loader, optimizer, criterion):
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
+        lr_scheduler.step()
         _, predicted = outputs.max(1)
 
         avg_loss(loss.item() * inputs.size(0),total=inputs.size(0))
@@ -73,8 +74,10 @@ def main():
     criterion = dataset.getAssociatedCriterion()
     _,optimizers,_ = getOptim(model,["AdaBelief","AdaHessian","AdamW","Apollo","RMSprop","SGD"])
     for optim in optimizers:
+        lr_scheduler = getLRScheduler(optim)
+        print(lr_scheduler)
         for epoch in range(num_epochs):
-            train_loss, train_acc = train(model, device, train_loader, optim, criterion)
+            train_loss, train_acc = train(model, device, train_loader, optim, criterion,lr_scheduler)
            # val_loss, val_acc = validate(model, device, val_loader, criterion)
            
             print(f'Epoch {epoch+1}/{num_epochs}')

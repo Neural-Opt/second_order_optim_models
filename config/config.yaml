@@ -15,7 +15,6 @@ Apollo:
   weight_decay: 0
   rebound: "constant"
 Adam:
-  init_lr: "None"
   lr: 0.01
   beta1: 0.9
   beta2: 0.999

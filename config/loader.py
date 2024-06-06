@@ -17,8 +17,9 @@ def getConfig(yaml_file_path="config.yaml"):
 
 def getLRScheduler(optim):
     conf = getConfig()
-    return getattr(torch.optim.lr_scheduler, conf["lr_scheduler"]["type"])
-    (optim,conf["lr_scheduler"]["step"], conf["lr_scheduler"]["gamma"])        
+    class_lr = getattr(torch.optim.lr_scheduler, conf["lr_scheduler"]["type"])
+    return class_lr(optim,conf["lr_scheduler"]["step"], conf["lr_scheduler"]["gamma"])         
+
 def getOptim(model,exclude:list):
     params = getConfig()
     class_names = ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]

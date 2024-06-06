@@ -7,10 +7,10 @@ class AverageAggregator:
         self.measure = measure
         self.measure_result = 0
         pass
-    def __call__(self, *args: Any,) -> Any:
-        all = args[1]
+    def __call__(self, *args: Any,total = 0) -> Any:
+        
         self.measure_result += self.measure(*args)
-        self.total += all.size(0)
+        self.total += total
         pass
     def get(self):
         if self.total == 0:
