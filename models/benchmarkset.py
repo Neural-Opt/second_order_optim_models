@@ -7,3 +7,5 @@ class BenchmarkSet:
         pass
     def getAssociatedModel(self):
         pass
+    def getAssociatedCriterion(self):
+        pass

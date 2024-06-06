@@ -47,4 +47,6 @@ class CIFAR(BenchmarkSet):
         model = models.resnet18()
         model.fc = nn.Linear(model.fc.in_features, self.num_classes)
         return model
+    def getAssociatedCriterion(self):
+        return nn.CrossEntropyLoss()
         

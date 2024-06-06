@@ -1,7 +1,9 @@
 from config.loader import get_optim
 from models.cifar import CIFAR
+from models.demux import getBenmarkSet
 import torch
 from utils.utils import AverageAggregator
+
 num_epochs = 25
 best_val_acc = 0.0
 def train(model, device, train_loader, optimizer, criterion):
@@ -66,22 +68,24 @@ def test(model, device, test_loader, criterion):
 
 def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    c = CIFAR()
-    train_loader ,test_loader , val_loader = c.getDataLoader()
-    _,adam,_ = get_optim(["AdaBelief","AdaHessian","AdamW","Apollo","RMSprop","SGD"])
-   
-    """for epoch in range(num_epochs):
-        train_loss, train_acc = train(model, device, train_loader, optimizer, criterion)
-        val_loss, val_acc = validate(model, device, val_loader, criterion)
-        
-        print(f'Epoch {epoch+1}/{num_epochs}')
-        print(f'Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}')
-        print(f'Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}')
-        
-        # Save the best model based on validation accuracy
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            torch.save(model.state_dict(), 'best_model.pth')"""
+    dataset = getBenmarkSet()
+    train_loader ,test_loader , val_loader = dataset.getDataLoader()
+    model  = dataset.getAssociatedModel()
+    criterion = dataset.getAssociatedCriterion()
+    _,optimizers,_ = get_optim(model,["AdaBelief","AdaHessian","AdamW","Apollo","RMSprop","SGD"])
+    for optim in optimizers:
+        for epoch in range(num_epochs):
+            train_loss, train_acc = train(model, device, train_loader, optim, criterion)
+            val_loss, val_acc = validate(model, device, val_loader, criterion)
+            break
+            print(f'Epoch {epoch+1}/{num_epochs}')
+            print(f'Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}')
+            print(f'Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}')
+            
+            # Save the best model based on validation accuracy
+            if val_acc > best_val_acc:
+                best_val_acc = val_acc
+                torch.save(model.state_dict(), 'best_model.pth')
 
 
 if __name__ == "__main__":
