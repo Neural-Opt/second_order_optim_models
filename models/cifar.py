@@ -10,12 +10,11 @@ class CIFAR(BenchmarkSet):
         super().__init__()
         self.conf = getConfig()
         self.batch_size = batch_size
-        self.dataset = dataset
-        if self.dataset == 'cifar10':
-            dataset = datasets.CIFAR10
+        if dataset == 'cifar10':
+            self.dataset = datasets.CIFAR10
             self.num_classes = 10
         else:
-            dataset = datasets.CIFAR100
+            self.dataset = datasets.CIFAR100
             self.num_classes = 100
     def log(self):
         pass
@@ -45,7 +44,7 @@ class CIFAR(BenchmarkSet):
         test_loader = DataLoader(testset, batch_size=self.batch_size, shuffle=False, num_workers=1)
         return (train_loader ,test_loader , val_loader)
     def getAssociatedModel(self):
-        model = models.resnet18(pretrained=False)
+        model = models.resnet18()
         model.fc = nn.Linear(model.fc.in_features, self.num_classes)
         return model
         
