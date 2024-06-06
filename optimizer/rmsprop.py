@@ -21,7 +21,6 @@ class RMSprop(Optimizer):
                     raise RuntimeError('RMSprop does not support sparse gradients')
 
                 state = self.state[p]
-
                 # State initialization
                 if len(state) == 0:
                     state['step'] = 0
@@ -32,7 +31,6 @@ class RMSprop(Optimizer):
 
                 state['step'] += 1
 
-                # Update running average of squared gradient
                 square_avg.mul_(alpha).addcmul_(grad, grad, value=1 - alpha)
 
                 avg = square_avg.sqrt().add_(group['eps'])

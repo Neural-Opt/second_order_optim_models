@@ -21,11 +21,7 @@ def get_optim(exclude:list):
     instances = []
     for class_name in class_names:
         if hasattr(optimizer, class_name):
-            class_ = getattr(optimizer, class_name)
-            instance = class_(**params[class_names])
-            instances.append(instance)
+            instances.append(getattr(optimizer, class_name))
         else:
             print(f"Class {class_name} not found in {optimizer.__name__}.")
-    return instances
-
-get_optim([])
+    return (class_names,instances,params)

@@ -21,7 +21,7 @@ from torchvision import datasets, transforms
 from torch.utils.data.dataloader import DataLoader
 import torchvision.models as models
 
-from optim import Apollo, RAdamW, AdaHessian, AdaBelief
+from optimizer import Apollo, RAdamW, AdaHessian, AdaBelief
 from utils import AverageMeter, accuracy
 
 

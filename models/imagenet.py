@@ -25,7 +25,7 @@ import torchvision.models as models
 import torch.distributed as dist
 from apex.parallel import DistributedDataParallel
 
-from optim import Apollo, RAdamW, AdaHessian, AdaBelief
+from optimizer import Apollo, RAdamW, AdaHessian, AdaBelief
 from utils import AverageMeter, accuracy
 
 
