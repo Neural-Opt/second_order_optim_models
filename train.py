@@ -1,12 +1,14 @@
+from config.loader import get_optim
 from models.cifar import CIFAR
 import torch
+from utils.utils import AverageAggregator
 num_epochs = 25
 best_val_acc = 0.0
 def train(model, device, train_loader, optimizer, criterion):
     model.train()
-    running_loss = 0.0
-    correct = 0
-    total = 0
+
+    accuracy = AverageAggregator()
+    avg_loss = AverageAggregator(measure=lambda loss:loss)
     for inputs, targets in train_loader:
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
@@ -14,15 +16,13 @@ def train(model, device, train_loader, optimizer, criterion):
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
-        
-        running_loss += loss.item() * inputs.size(0)
         _, predicted = outputs.max(1)
-        total += targets.size(0)
-        correct += predicted.eq(targets).sum().item()
-        
-    epoch_loss = running_loss / total
-    epoch_acc = correct / total
-    return epoch_loss, epoch_acc
+
+        avg_loss(loss.item() * inputs.size(0),inputs)
+        accuracy(predicted,targets)
+      
+
+    return inputs.get(), accuracy.get()
 
 def validate(model, device, val_loader, criterion):
     model.eval()
@@ -68,9 +68,8 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     c = CIFAR()
     train_loader ,test_loader , val_loader = c.getDataLoader()
-    for inputs, targets in train_loader:
-        print(inputs.shape,targets.shape)
-
+    _,adam,_ = get_optim(["AdaBelief","AdaHessian","AdamW","Apollo","RMSprop","SGD"])
+   
     """for epoch in range(num_epochs):
         train_loss, train_acc = train(model, device, train_loader, optimizer, criterion)
         val_loss, val_acc = validate(model, device, val_loader, criterion)
