@@ -1,10 +1,12 @@
 import yaml
 import os
 import sys
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
 import optimizer
+import torch.optim.lr_scheduler 
 
 def getConfig(yaml_file_path="config.yaml"):
     yaml_file_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), yaml_file_path)
@@ -13,7 +15,11 @@ def getConfig(yaml_file_path="config.yaml"):
         print(yaml_content)
     return yaml_content
 
-def get_optim(model,exclude:list):
+def getLRScheduler(optim):
+    conf = getConfig()
+    return getattr(torch.optim.lr_scheduler, conf["lr_scheduler"]["type"])
+    (optim,conf["lr_scheduler"]["step"], conf["lr_scheduler"]["gamma"])        
+def getOptim(model,exclude:list):
     params = getConfig()
     class_names = ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
     class_names = [i for i in class_names if i not in exclude]

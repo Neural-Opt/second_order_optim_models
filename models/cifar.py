@@ -20,9 +20,7 @@ class CIFAR(BenchmarkSet):
         pass
     def setup(self,):
         pass
-    def getDataLoader(self,):
-       
-        print(self.conf["dataset"]["path"])
+    def getDataLoader(self,):       
         trainset = self.dataset(self.conf["dataset"]["path"], train=True, download=True,
                        transform=transforms.Compose([
                            transforms.RandomCrop(32, padding=4),

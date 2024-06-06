@@ -1,3 +1,7 @@
+lr_scheduler:
+  type: "CosineAnnealingLR"
+  step: 30
+  gamma: 0.1
 dataset:
   name: "cifar10"
   path: "./data/cifar10"

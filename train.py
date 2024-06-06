@@ -1,4 +1,4 @@
-from config.loader import get_optim
+from config.loader import getOptim
 from models.cifar import CIFAR
 from models.demux import getBenmarkSet
 import torch
@@ -71,7 +71,7 @@ def main():
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     model  = dataset.getAssociatedModel()
     criterion = dataset.getAssociatedCriterion()
-    _,optimizers,_ = get_optim(model,["AdaBelief","AdaHessian","AdamW","Apollo","RMSprop","SGD"])
+    _,optimizers,_ = getOptim(model,["AdaBelief","AdaHessian","AdamW","Apollo","RMSprop","SGD"])
     for optim in optimizers:
         for epoch in range(num_epochs):
             train_loss, train_acc = train(model, device, train_loader, optim, criterion)
