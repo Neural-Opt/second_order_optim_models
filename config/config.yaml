@@ -1,4 +1,6 @@
-dataset: ""
+dataset:
+  name: "cifar10"
+  path: "./data/cifar10"
 Apollo:
   init_lr: "None"
   lr: 0.01
