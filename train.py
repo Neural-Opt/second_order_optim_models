@@ -20,11 +20,10 @@ def train(model, device, train_loader, optimizer, criterion):
         optimizer.step()
         _, predicted = outputs.max(1)
 
-        avg_loss(loss.item() * inputs.size(0),inputs)
-        accuracy(predicted,targets)
-      
+        avg_loss(loss.item() * inputs.size(0),total=inputs.size(0))
+        accuracy(predicted,targets,total=inputs.size(0))
 
-    return inputs.get(), accuracy.get()
+    return avg_loss.get(), accuracy.get()
 
 def validate(model, device, val_loader, criterion):
     model.eval()
@@ -76,10 +75,11 @@ def main():
     for optim in optimizers:
         for epoch in range(num_epochs):
             train_loss, train_acc = train(model, device, train_loader, optim, criterion)
-            val_loss, val_acc = validate(model, device, val_loader, criterion)
-            break
+           # val_loss, val_acc = validate(model, device, val_loader, criterion)
+           
             print(f'Epoch {epoch+1}/{num_epochs}')
             print(f'Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}')
+            break
             print(f'Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}')
             
             # Save the best model based on validation accuracy
