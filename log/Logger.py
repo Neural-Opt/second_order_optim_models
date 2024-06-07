@@ -12,13 +12,25 @@ def createNewRun(base_dir):
 class Logger:
     def __init__(self,test_set) -> None:
         conf = getConfig()
-        
+        self.test_name = test_set
         self.base = f"{conf["runs"]["dir"]}/{test_set}"
         self.currRun = createNewRun(self.base)
-        self.benchmarkState = BenchmarkState(f"{self.currRun}/benchmark.json")
+
+    def setup(self,optim):
+        os.makedirs(f"{ self.currRun}/{optim}")
+        self.benchmarkState = BenchmarkState(f"{self.currRun}/{optim}/benchmark.json")
         self.benchmark = Benchmark.getInstance(self.benchmarkState)
 
+    def trash(self,):
+        Benchmark.cleanUp()
 
-        
-
+    def getData(self,number_of_trial = 1):
+        base_dir = f"{self.base}/{number_of_trial}"
+        for d in os.listdir(base_dir):
+            print(os.path.join(base_dir, d))
+            state = BenchmarkState(f"{os.path.join(base_dir, d)}/benchmark.json")
+            state.load()
+            data = state.dump()
+            print(data)
+            
 

@@ -10,6 +10,8 @@ class BenchmarkState:
         self.lock = threading.Lock()
         self.load()
 
+    def dump(self,):
+        return self.data
     def load(self):
         with self.lock:
             try:
@@ -24,8 +26,10 @@ class BenchmarkState:
                 pickle.dump(self.data, file)
 
     def set(self, key, value):
+
         with self.lock:
             self.data[key] = value
+            print(self.data)
             threading.Thread(target=self.save).start()
 
     def get(self, key, default=None):
