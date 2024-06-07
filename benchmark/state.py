@@ -9,7 +9,6 @@ class BenchmarkState:
         self.data = {}
         self.lock = threading.Lock()
         self.load()
-        #hallo
 
     def load(self):
         with self.lock:

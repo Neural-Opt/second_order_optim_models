@@ -1,3 +1,4 @@
+from benchmark.benchmark import Benchmark
 from config.loader import getOptim,getLRScheduler
 from models.cifar import CIFAR
 from models.demux import getBenchmarkSet
@@ -8,7 +9,7 @@ num_epochs = 25
 best_val_acc = 0.0
 def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
     model.train()
-
+    benchmark = Benchmark.getInstance(None)
     accuracy = AverageAggregator()
     avg_loss = AverageAggregator(measure=lambda loss:loss)
     for inputs, targets in train_loader:
@@ -17,12 +18,16 @@ def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         loss.backward()
+        benchmark.stepStart()
         optimizer.step()
+        benchmark.stepEnd()
         lr_scheduler.step()
         _, predicted = outputs.max(1)
 
         avg_loss(loss.item() * inputs.size(0),total=inputs.size(0))
         accuracy(predicted,targets,total=inputs.size(0))
+    benchmark.addTrainAcc(accuracy.get())
+    benchmark.addTrainLoss(avg_loss.get())
 
     return avg_loss.get(), accuracy.get()
 

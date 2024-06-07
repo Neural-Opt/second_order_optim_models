@@ -2,4 +2,4 @@ data/
 runs/
 # Ignore Python compiled files
 __pycache__/
-*.py
+*.pyc

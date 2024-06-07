@@ -22,7 +22,10 @@ class Benchmark:
         acc_train =  self.state.get("acc_train")
         acc_train.append(acc)
         self.state.set("acc_train",acc_train)
-        
+    def addTrainLoss(self,loss):
+        loss_train =  self.state.get("train_loss")
+        loss_train.append(loss)
+        self.state.set("train_loss",loss_train)
     def addTestAcc(self,acc):
         acc_test =  self.state.get("acc_test")
         acc_test.append(acc)
