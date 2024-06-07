@@ -86,7 +86,7 @@ def main():
         lr_scheduler = getLRScheduler(optim)
         for epoch in range(num_epochs):
             train_loss, train_acc = train(model, device, train_loader, optim, criterion,lr_scheduler)
-            logger.getData()
+            print(logger.getData())
            # val_loss, val_acc = validate(model, device, val_loader, criterion)
            
             print(f'Epoch {epoch+1}/{num_epochs}')

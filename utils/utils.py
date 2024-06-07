@@ -1,8 +1,11 @@
 import psutil
+
 from typing import Callable, Any
 
+
+
 def CPUMemory():
-    return psutil.virtual_memory().used / 1024**2
+    return psutil.virtual_memory().used / 1024**3
 
 
 class AverageAggregator:
