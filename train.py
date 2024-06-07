@@ -1,9 +1,9 @@
 from config.loader import getOptim,getLRScheduler
 from models.cifar import CIFAR
-from models.demux import getBenmarkSet
+from models.demux import getBenchmarkSet
 import torch
 from utils.utils import AverageAggregator
-
+from log.Logger import Logger
 num_epochs = 25
 best_val_acc = 0.0
 def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
@@ -67,8 +67,9 @@ def test(model, device, test_loader, criterion):
     return epoch_loss, epoch_acc
 
 def main():
+    logger = Logger()
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    dataset = getBenmarkSet()
+    dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     model  = dataset.getAssociatedModel()
     criterion = dataset.getAssociatedCriterion()
