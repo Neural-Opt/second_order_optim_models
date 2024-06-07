@@ -67,7 +67,7 @@ def test(model, device, test_loader, criterion):
     return epoch_loss, epoch_acc
 
 def main():
-    logger = Logger()
+    logger = Logger("test")
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()

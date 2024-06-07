@@ -12,7 +12,6 @@ def getConfig(yaml_file_path="config.yaml"):
     yaml_file_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), yaml_file_path)
     with open(yaml_file_path, 'r') as file:
         yaml_content = yaml.safe_load(file)
-        print(yaml_content)
     return yaml_content
 
 def getLRScheduler(optim):
