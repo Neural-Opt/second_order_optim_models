@@ -27,12 +27,11 @@ class Logger:
     def getData(self,number_of_trial = 1):
         base_dir = f"{self.base}/{number_of_trial}"
         output = {}
-        for d in os.listdir(base_dir):
-            optim = os.path.dirname(d)
+        for d in os.listdir(base_dir):    
             state = BenchmarkState(f"{os.path.join(base_dir, d)}/benchmark.json")
             state.load()
             data = state.dump()
-            output[optim] = data
+            output[d] = data
 
         return output
             
