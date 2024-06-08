@@ -3,6 +3,19 @@ runs:
 dataset:
   name: "cifar10"
   path: "./data/cifar10"
+kpi:
+  - name: "tps"
+    unit: "ms"
+    fqn: "Time per step"
+  - name: "acc_train"
+    unit: "%"
+    fqn: "Training Accuracy"
+  - name: "acc_test"
+    unit: "%"
+    fqn: "Test Accuracy"
+  - name: "gpu_mem"
+    unit: "GB"
+    fqn: "GPU Memory usage"
 lr_scheduler:
   type: "CosineAnnealingLR"
   step: 30
