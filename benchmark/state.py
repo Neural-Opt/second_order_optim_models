@@ -29,7 +29,6 @@ class BenchmarkState:
 
         with self.lock:
             self.data[key] = value
-            print(self.data)
             threading.Thread(target=self.save).start()
 
     def get(self, key, default=None):

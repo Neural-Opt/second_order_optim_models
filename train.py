@@ -17,7 +17,7 @@ def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
     i = 0
     for inputs, targets in train_loader:
         i = i+1
-        if i == 100:
+        if i == 10:
             break
         print(i)
         inputs, targets = inputs.to(device), targets.to(device)
@@ -96,18 +96,15 @@ def main():
             train_loss, train_acc = train(model, device, train_loader, optim, criterion,lr_scheduler)
            
            # val_loss, val_acc = validate(model, device, val_loader, criterion)
-           
             print(f'Epoch {epoch+1}/{num_epochs}')
             print(f'Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}')
             break
             print(f'Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}')
-            
             # Save the best model based on validation accuracy
             if val_acc > best_val_acc:
                 best_val_acc = val_acc
                 torch.save(model.state_dict(), 'best_model.pth')
         logger.trash()
-    plot = Plotter(names,logger.getData())
-    plot.plot()
+    logger.plot(names=names)
 if __name__ == "__main__":
     main()

@@ -2,6 +2,7 @@ import os
 import pickle
 from config.loader import getConfig
 from benchmark.benchmark import Benchmark,BenchmarkState
+from visualize.plot import Plotter
 def createNewRun(base_dir):
     if not os.path.isdir(base_dir):
         os.makedirs(base_dir)
@@ -32,7 +33,9 @@ class Logger:
             state.load()
             data = state.dump()
             output[d] = data
-
         return output
+    def plot(self,names):
+        plot = Plotter(names,self.getData())
+        plot.plot(base_file=f"{self.currRun}")
             
 
