@@ -5,7 +5,6 @@ from models.demux import getBenchmarkSet
 import torch
 from utils.utils import AverageAggregator
 from log.Logger import Logger
-from visualize.plot import Plotter
 
 num_epochs = 25
 best_val_acc = 0.0
@@ -17,26 +16,32 @@ def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
     i = 0
     for inputs, targets in train_loader:
         i = i+1
-        if i == 10:
+        if i == 1000:
             break
         print(i)
+        benchmark.measureGPUMemUsageStart()
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         loss.backward()
+
+       
         benchmark.stepStart()
         optimizer.step()
         benchmark.stepEnd()
+
         lr_scheduler.step()
         _, predicted = outputs.max(1)
 
-        avg_loss(loss.item() * inputs.size(0),total=inputs.size(0))
-        accuracy(predicted,targets,total=inputs.size(0))
-        benchmark.measureGPUMemUsage()
+        benchmark.measureGPUMemUsageEnd()
+
+        avg_loss(loss.item() * inputs.size(0))
+        accuracy(predicted,targets)
         
-        benchmark.addTrainAcc(accuracy.get())
-        benchmark.addTrainLoss(avg_loss.get())
+    benchmark.addTrainAcc(accuracy.get())
+    benchmark.addTrainLoss(avg_loss.get())
+    benchmark.flush()
 
     return avg_loss.get(), accuracy.get()
 
@@ -84,11 +89,14 @@ def main():
     logger = Logger("test")
    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(device)
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     model  = dataset.getAssociatedModel()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,_ = getOptim(model,["AdaBelief","AdaHessian","AdamW","Apollo","RMSprop","SGD"])
+    names,optimizers,_ = getOptim(model,["AdaHessian","RMSprop"])
+    model = model.to(device)
+
     for optim,name in zip(optimizers,names):
         logger.setup(optim=name)
         lr_scheduler = getLRScheduler(optim)

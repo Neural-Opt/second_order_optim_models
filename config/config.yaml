@@ -14,7 +14,7 @@ kpi:
     unit: ""
     fqn: "Train Loss"
   - name: "gpu_mem"
-    unit: "GB"
+    unit: "MB"
     fqn: "GPU Memory usage"
 lr_scheduler:
   type: "CosineAnnealingLR"
@@ -45,23 +45,17 @@ AdaHessian:
   weight_decay: 0
   rebound: "constant"
 AdaBelief:
-  init_lr: "None"
   lr: 0.01
+  beta1: 0.9
+  beta2: 0.999
   eps: 0.0001
-  beta: 0.9
-  warmup: 500
-  weight_decay_type: "None"
   weight_decay: 0
-  rebound: "constant"
 AdamW:
-  init_lr: "None"
   lr: 0.01
+  beta1: 0.9
+  beta2: 0.999
   eps: 0.0001
-  beta: 0.9
-  warmup: 500
-  weight_decay_type: "None"
   weight_decay: 0
-  rebound: "constant"
 RMSProp:
   init_lr: "None"
   lr: 0.01
@@ -72,11 +66,6 @@ RMSProp:
   weight_decay: 0
   rebound: "constant"
 SGD:
-  init_lr: "None"
   lr: 0.01
-  eps: 0.0001
-  beta: 0.9
-  warmup: 500
-  weight_decay_type: "None"
+  momentum: 0
   weight_decay: 0
-  rebound: "constant"

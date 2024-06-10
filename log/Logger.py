@@ -8,14 +8,14 @@ def createNewRun(base_dir):
         os.makedirs(base_dir)
     dir_count = sum(os.path.isdir(os.path.join(base_dir, d)) for d in os.listdir(base_dir)) 
     os.makedirs( os.path.join(base_dir,  f"{dir_count + 1}"))
-    return os.path.join(base_dir,  f"{dir_count + 1}")
+    return os.path.join(base_dir,  f"{dir_count + 1}"), dir_count + 1
     
 class Logger:
     def __init__(self,test_set) -> None:
         conf = getConfig()
         self.test_name = test_set
-        self.base = f"{conf["runs"]["dir"]}/{test_set}"
-        self.currRun = createNewRun(self.base)
+        self.base = f"{conf['runs']['dir']}/{test_set}"
+        self.currRun,self.dirCount = createNewRun(self.base)
 
     def setup(self,optim):
         os.makedirs(f"{ self.currRun}/{optim}")
@@ -27,15 +27,18 @@ class Logger:
 
     def getData(self,number_of_trial = 1):
         base_dir = f"{self.base}/{number_of_trial}"
+        print(base_dir)
         output = {}
-        for d in os.listdir(base_dir):    
+        for d in os.listdir(base_dir):
+            if d == "result_plot.png":
+                continue
             state = BenchmarkState(f"{os.path.join(base_dir, d)}/benchmark.json")
             state.load()
             data = state.dump()
             output[d] = data
         return output
     def plot(self,names):
-        plot = Plotter(names,self.getData())
+        plot = Plotter(names,self.getData(number_of_trial=self.dirCount))
         plot.plot(base_file=f"{self.currRun}")
             
 

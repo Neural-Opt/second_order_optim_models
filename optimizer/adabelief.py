@@ -2,8 +2,8 @@ import torch
 from torch.optim import Optimizer
 
 class AdaBelief(Optimizer):
-    def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0, weight_decouple=False, fixed_decay=False, amsgrad=False):
-        defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay, weight_decouple=weight_decouple, fixed_decay=fixed_decay, amsgrad=amsgrad)
+    def __init__(self, params, lr=1e-3, beta1=0.9,beta2=0.999, eps=1e-8, weight_decay=0, weight_decouple=False, fixed_decay=False, amsgrad=False):
+        defaults = dict(lr=lr, beta1=beta1, beta2=beta2, eps=eps, weight_decay=weight_decay, weight_decouple=weight_decouple, fixed_decay=fixed_decay, amsgrad=amsgrad)
         super(AdaBelief, self).__init__(params, defaults)
 
     def step(self, closure=None):
@@ -30,7 +30,8 @@ class AdaBelief(Optimizer):
                         state['max_exp_avg_sq'] = torch.zeros_like(p.data)
 
                 exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
-                beta1, beta2 = group['betas']
+                beta1=group['beta1']
+                beta2=group['beta2']
 
                 state['step'] += 1
 

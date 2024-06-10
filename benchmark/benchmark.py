@@ -1,6 +1,8 @@
 import time
+import torch
 from benchmark.state import BenchmarkState
-from utils.utils import CPUMemory
+from utils.utils import AverageAggregator
+
 class Benchmark:
     _instance = None
     def __init__(self,state:BenchmarkState) -> None:
@@ -9,15 +11,13 @@ class Benchmark:
     def __getstate__(self) -> object:
         return self.state
     def stepStart(self,):
+        self.averageStepTime = AverageAggregator(measure=lambda time:time)
         self.start_time = time.perf_counter()
         pass
     def stepEnd(self,):
-        assert(self.start_time != None, "Timer has not been started")
+        assert self.start_time != None, "Timer has not been started"
         diff =  time.perf_counter()  - self.start_time
-        tps =  self.state.get("tps")
-        tps = tps if tps != None else []
-        tps.append(diff)
-        self.state.set("tps",tps)
+        self.averageStepTime(diff)
         self.start_time = None
     def addTrainAcc(self,acc):
         acc_train =  self.state.get("acc_train")
@@ -35,11 +35,24 @@ class Benchmark:
         acc_test.append(acc)
         self.state.set("acc_test",acc_test)
 
-    def measureGPUMemUsage(self,):
+    def measureGPUMemUsageStart(self,):
+        torch.cuda.reset_peak_memory_stats()
+        self.memory_allocated_before = torch.cuda.memory_allocated()
+
+    def measureGPUMemUsageEnd(self,):
+        self.max_memory = torch.cuda.max_memory_allocated()
+        difference = max(self.max_memory - self.memory_allocated_before,0) / 1024**2
         gpu_mem =  self.state.get("gpu_mem")
         gpu_mem = gpu_mem if gpu_mem != None else []
-        gpu_mem.append(CPUMemory())
+        gpu_mem.append(difference)
         self.state.set("gpu_mem",gpu_mem)
+    def flush(self,):
+        tps =  self.state.get("tps")
+        tps = tps if tps != None else [float(self.averageStepTime.get())]
+        tps.append(float(self.averageStepTime.get()))
+        self.averageStepTime = None
+        self.state.set("tps",tps)
+
         
     @staticmethod
     def getInstance(state:BenchmarkState):

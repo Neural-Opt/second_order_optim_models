@@ -2,9 +2,9 @@ import torch
 from torch.optim import Optimizer
 
 class AdamW(Optimizer):
-    def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, weight_decay=0):
-        # Initialize the parameter groups and defaults
-        defaults = dict(lr=lr, betas=betas, eps=eps, weight_decay=weight_decay)
+    def __init__(self, params, lr=1e-3, beta1 =0.9, beta2=0.999, eps=1e-8, weight_decay=0):
+        # Initialize the parameter groups and default
+        defaults = dict(lr=lr, beta1=beta1, beta2=beta2, eps=eps, weight_decay=weight_decay)
         super(AdamW, self).__init__(params, defaults)
 
     def step(self, closure=None):
@@ -30,8 +30,8 @@ class AdamW(Optimizer):
                     state['exp_avg_sq'] = torch.zeros_like(p.data)
 
                 exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
-                beta1, beta2 = group['betas']
-
+                beta1 = group['beta1']
+                beta2 = group['beta2']
                 state['step'] += 1
                 if group['weight_decay'] != 0:
                     grad = grad.add(p.data, alpha=group['weight_decay'])

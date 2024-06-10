@@ -24,11 +24,13 @@ def getOptim(model,exclude:list):
     class_names = ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
     class_names = [i for i in class_names if i not in exclude]
     instances = []
+    print(class_names)
     for class_name in class_names:
         if hasattr(optimizer, class_name):
-            params = params[class_name]
+            print(params.keys())
+            print(class_name)
             class_ = getattr(optimizer, class_name)            
-            instances.append(class_(model.parameters(),**params))
+            instances.append(class_(model.parameters(),**params[class_name]))
         else:
             print(f"Class {class_name} not found in {optimizer.__name__}.")
     return (class_names,instances,params)

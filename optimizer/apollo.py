@@ -34,13 +34,13 @@ class Apollo(Optimizer):
             raise ValueError("Invalid recitifed bound: {}".format(rebound))
         if not 0.0 <= warmup:
             raise ValueError("Invalid warmup updates: {}".format(warmup))
-        if init_lr is None:
+        if init_lr == "None":
             init_lr = lr / 1000
         if not 0.0 <= init_lr <= lr:
             raise ValueError("Invalid initial learning rate: {}".format(init_lr))
         if not 0.0 <= weight_decay:
             raise ValueError("Invalid weight_decay value: {}".format(weight_decay))
-        if weight_decay_type is None:
+        if weight_decay_type == "None":
             weight_decay_type = 'L2' if rebound == 'constant' else 'decoupled'
         if weight_decay_type not in ['L2', 'decoupled', 'stable']:
             raise ValueError("Invalid weight decay type: {}".format(weight_decay_type))

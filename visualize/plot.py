@@ -16,7 +16,7 @@ class Plotter():
                 ax = self.axs.flatten()[i]
                 value = self.data[optim][k]
                 ax.plot(np.arange(len(value)),value, label=optim)
-                ax.set_title(f"{kpi["fqn"]} ({kpi["unit"]})")
+                ax.set_title(f"{kpi['fqn']} ({kpi['unit']})")
                 ax.legend()
              
         plt.tight_layout() 
