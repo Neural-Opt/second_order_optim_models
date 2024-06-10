@@ -3,22 +3,20 @@ from config.loader import getOptim,getLRScheduler
 from models.cifar import CIFAR
 from models.demux import getBenchmarkSet
 import torch
-from utils.utils import AverageAggregator
+from utils.utils import MeanAggregator
 from log.Logger import Logger
+from tqdm import tqdm
 
-num_epochs = 25
+num_epochs = 4
 best_val_acc = 0.0
 def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
     model.train()
     benchmark = Benchmark.getInstance(None)
-    accuracy = AverageAggregator()
-    avg_loss = AverageAggregator(measure=lambda loss:loss)
+    accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
+    avg_loss = MeanAggregator()
     i = 0
     for inputs, targets in train_loader:
-        i = i+1
-        if i == 1000:
-            break
-        print(i)
+       # print(i)
         benchmark.measureGPUMemUsageStart()
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
@@ -26,7 +24,7 @@ def train(model, device, train_loader, optimizer, criterion,lr_scheduler):
         loss = criterion(outputs, targets)
         loss.backward()
 
-       
+    
         benchmark.stepStart()
         optimizer.step()
         benchmark.stepEnd()
@@ -92,27 +90,26 @@ def main():
     print(device)
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
-    model  = dataset.getAssociatedModel()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,_ = getOptim(model,["AdaHessian","RMSprop"])
-    model = model.to(device)
+    names,optimizers,params = getOptim(["AdaHessian","RMSprop"])
 
-    for optim,name in zip(optimizers,names):
+    for optim_class, name in zip(optimizers, names):
+        model  = dataset.getAssociatedModel()
+        model = model.to(device)
+        optim = optim_class(model.parameters(),**params[name])
+
         logger.setup(optim=name)
         lr_scheduler = getLRScheduler(optim)
-        for epoch in range(num_epochs):
-            train_loss, train_acc = train(model, device, train_loader, optim, criterion,lr_scheduler)
-           
-           # val_loss, val_acc = validate(model, device, val_loader, criterion)
-            print(f'Epoch {epoch+1}/{num_epochs}')
-            print(f'Train Loss: {train_loss:.4f}, Train Accuracy: {train_acc:.4f}')
-            break
-            print(f'Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}')
-            # Save the best model based on validation accuracy
-            if val_acc > best_val_acc:
-                best_val_acc = val_acc
-                torch.save(model.state_dict(), 'best_model.pth')
+    
+        with tqdm(total=num_epochs, desc='Training Progress', unit='epoch') as epoch_bar:
+            for epoch in range(num_epochs):
+                train_loss, train_acc = train(model, device, train_loader, optim, criterion, lr_scheduler)
+                    
+                epoch_bar.set_postfix({'optim':f'{name}','loss': f'{train_loss:.4f}', 'accuracy': f'{train_acc:.4f}'})
+                epoch_bar.update(1)
+        
         logger.trash()
+    
     logger.plot(names=names)
 if __name__ == "__main__":
     main()

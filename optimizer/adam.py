@@ -6,7 +6,8 @@ class Adam(Optimizer):
         # Initialize the parameter groups and defaults
         defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps, weight_decay=weight_decay)
         super(Adam, self).__init__(params, defaults)
-
+    
+    @torch.no_grad()
     def step(self, closure=None):
         loss = None
         if closure is not None:

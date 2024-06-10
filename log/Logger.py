@@ -27,7 +27,6 @@ class Logger:
 
     def getData(self,number_of_trial = 1):
         base_dir = f"{self.base}/{number_of_trial}"
-        print(base_dir)
         output = {}
         for d in os.listdir(base_dir):
             if d == "result_plot.png":

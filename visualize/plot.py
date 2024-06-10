@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from config.loader import getConfig
+#import tikzplotlib
+
 class Plotter():
     def __init__(self,optimizers,data) -> None:
         self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 8))
@@ -15,10 +17,14 @@ class Plotter():
                 kpi = list(filter(lambda x: x["name"] == k,kpis))[0]
                 ax = self.axs.flatten()[i]
                 value = self.data[optim][k]
+                print(k,value)
                 ax.plot(np.arange(len(value)),value, label=optim)
                 ax.set_title(f"{kpi['fqn']} ({kpi['unit']})")
                 ax.legend()
              
         plt.tight_layout() 
         plt.savefig(f'{base_file}/result_plot.png')       
+      #  tikzplotlib.save(f'{base_file}/result-tex.tex')
 
+
+#tikzplotlib

@@ -1,4 +1,7 @@
-"""This module implements our CI function calls."""
+"""
+This module implements our CI function calls.
+This implementation is taken from https://github.com/v0lta/PyTorch-Wavelet-Toolbox/blob/main/noxfile.py
+"""
 
 import nox
 

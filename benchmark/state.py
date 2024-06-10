@@ -41,3 +41,11 @@ class BenchmarkState:
                 del self.data[key]
                 threading.Thread(target=self.save).start()
 
+    def __getitem__(self, key,default=None):
+       with self.lock:
+            return self.data.get(key, default)
+    
+    def __setitem__(self, key, value):
+       with self.lock:
+            self.data[key] = value
+            threading.Thread(target=self.save).start()

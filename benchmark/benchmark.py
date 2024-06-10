@@ -1,17 +1,17 @@
 import time
 import torch
 from benchmark.state import BenchmarkState
-from utils.utils import AverageAggregator
+from utils.utils import MeanAggregator
 
 class Benchmark:
     _instance = None
-    def __init__(self,state:BenchmarkState) -> None:
+    def __init__(self,state: BenchmarkState) -> None:
         self.state = state
         pass
     def __getstate__(self) -> object:
         return self.state
     def stepStart(self,):
-        self.averageStepTime = AverageAggregator(measure=lambda time:time)
+        self.averageStepTime = MeanAggregator(measure=lambda time:time)
         self.start_time = time.perf_counter()
         pass
     def stepEnd(self,):
@@ -36,24 +36,31 @@ class Benchmark:
         self.state.set("acc_test",acc_test)
 
     def measureGPUMemUsageStart(self,):
+        self.averageMemory = MeanAggregator(measure=lambda mem:mem)
         torch.cuda.reset_peak_memory_stats()
         self.memory_allocated_before = torch.cuda.memory_allocated()
 
     def measureGPUMemUsageEnd(self,):
         self.max_memory = torch.cuda.max_memory_allocated()
         difference = max(self.max_memory - self.memory_allocated_before,0) / 1024**2
-        gpu_mem =  self.state.get("gpu_mem")
-        gpu_mem = gpu_mem if gpu_mem != None else []
-        gpu_mem.append(difference)
-        self.state.set("gpu_mem",gpu_mem)
+        self.averageMemory(difference)
+    
     def flush(self,):
         tps =  self.state.get("tps")
-        tps = tps if tps != None else [float(self.averageStepTime.get())]
-        tps.append(float(self.averageStepTime.get()))
-        self.averageStepTime = None
-        self.state.set("tps",tps)
+        gpu_mem =  self.state.get("gpu_mem")
 
-        
+        tps = tps if tps != None else []
+        gpu_mem = gpu_mem if gpu_mem != None else []
+
+        tps.append(float(self.averageStepTime.get()))
+        gpu_mem.append(float(self.averageMemory.get()))
+
+        self.averageStepTime = None
+        self.averageMemory = None
+
+        self.state.set("tps",tps)
+        self.state.set("gpu_mem",gpu_mem)
+
     @staticmethod
     def getInstance(state:BenchmarkState):
         if not Benchmark._instance:
