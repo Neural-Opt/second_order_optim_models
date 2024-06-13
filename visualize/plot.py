@@ -5,7 +5,7 @@ from config.loader import getConfig
 
 class Plotter():
     def __init__(self,optimizers,data) -> None:
-        self.fig, self.axs = plt.subplots(3, 3, figsize=(12, 8))
+        self.fig, self.axs = plt.subplots(2, 3, figsize=(12, 8))
         self.data = data
         self.optimizers = optimizers
 

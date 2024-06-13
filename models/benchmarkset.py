@@ -9,3 +9,7 @@ class BenchmarkSet:
         pass
     def getAssociatedCriterion(self):
         pass
+    def train(self, model, device, train_loader, optimizer, criterion,lr_scheduler):
+        pass
+    def test(self,model, device, test_loader, criterion):
+        pass

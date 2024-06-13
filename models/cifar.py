@@ -1,3 +1,4 @@
+from benchmark.benchmark import Benchmark
 from config.loader import getConfig
 from models.benchmarkset import BenchmarkSet
 from torchvision import datasets, transforms, models
@@ -6,6 +7,8 @@ import torch.nn as nn
 import torch
 import numpy as np
 import random
+
+from utils.utils import MeanAggregator
 class CIFAR(BenchmarkSet):
     def __init__(self,batch_size=16,dataset="cifar10") -> None:
         super().__init__()
@@ -56,4 +59,49 @@ class CIFAR(BenchmarkSet):
         return model
     def getAssociatedCriterion(self):
         return nn.CrossEntropyLoss()
+    def train(self, model, device, train_loader, optimizer, criterion,lr_scheduler):
+        model.train()
+        benchmark = Benchmark.getInstance(None)
+        accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
+        avg_loss = MeanAggregator()
+        
+        for inputs, targets in train_loader:
+            benchmark.stepStart()
+            benchmark.measureGPUMemUsageStart()
+            inputs, targets = inputs.to(device), targets.to(device)
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, targets)
+            loss.backward()
+            optimizer.step()
+            lr_scheduler.step()
+            _, predicted = outputs.max(1)
+
+            benchmark.measureGPUMemUsageEnd()
+
+            avg_loss(loss.item())
+            accuracy(predicted,targets)
+            benchmark.stepEnd()
+        
+        benchmark.addTrainAcc(accuracy.get())
+        benchmark.addTrainLoss(avg_loss.get())
+        benchmark.flush()
+
+        return avg_loss.get(), accuracy.get()
+    def test(self,model, device, test_loader, criterion):
+        model.eval()
+        benchmark = Benchmark.getInstance(None)
+
+        accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
+        avg_loss = MeanAggregator()
+
+        with torch.no_grad():
+            for inputs, targets in test_loader:
+                inputs, targets = inputs.to(device), targets.to(device)
+                outputs = model(inputs)
+                _, predicted = outputs.max(1)
+                accuracy(predicted,targets)
+
+            benchmark.addTestAcc(accuracy.get())
+        return accuracy.get()
         

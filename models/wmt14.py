@@ -1,9 +1,8 @@
 
 from config.loader import getConfig
 from models.benchmarkset import BenchmarkSet
-from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader
-import torch.nn as nn
+from datasets import load_dataset
 from transformers import MarianTokenizer,MarianMTModel, MarianConfig
 
 class WMT14(BenchmarkSet):
@@ -11,9 +10,10 @@ class WMT14(BenchmarkSet):
         super().__init__()
         self.conf = getConfig()
       # Load the WMT14 English-German dataset
-        self.dataset = datasets.load_dataset("wmt14", "de-en")
-        self.tokenizer = MarianTokenizer.from_pretrained('Helsinki-NLP/opus-mt-en-de')
+        self.dataset = load_dataset("wmt14", "de-en")
 
+        self.tokenizer =   MarianTokenizer.from_pretrained('Helsinki-NLP/opus-mt-en-de')
+        self.setup()
 
     def log(self):
         pass
@@ -27,33 +27,11 @@ class WMT14(BenchmarkSet):
         model_inputs['labels'] = labels['input_ids']
         return model_inputs
     def setup(self):
-       # Apply preprocessing
         self.tokenized_datasets =self.dataset.map(self.preprocess, batched=True)
         self.tokenized_datasets.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
         
     def getDataLoader(self):
-        # Data augmentation and normalization for training
-        # Just normalization for validation
-        data_transforms = {
-            'train': transforms.Compose([
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-            ]),
-            'val': transforms.Compose([
-                transforms.Resize(256),
-                transforms.CenterCrop(224),
-                transforms.ToTensor(),
-                transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-            ]),
-        }
-
-        image_datasets = {x: datasets.ImageFolder(root=f"{self.dataset_path}/{x}", transform=data_transforms[x])
-                          for x in ['train', 'val']}
-        dataloaders = {x: DataLoader(image_datasets[x], batch_size=self.batch_size, shuffle=True, num_workers=4)
-                       for x in ['train', 'val']}
-        return dataloaders['train'], dataloaders['val']
+       pass
 
     def getAssociatedModel(self):
         config = MarianConfig(
@@ -83,5 +61,5 @@ class WMT14(BenchmarkSet):
         return model
 
     def getAssociatedCriterion(self):
-        return nn.CrossEntropyLoss()
+        pass
 

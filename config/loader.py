@@ -8,6 +8,11 @@ sys.path.append(parent_dir)
 import optimizer
 import torch.optim.lr_scheduler 
 
+class DummyLR:
+    def __init__(self,*args):
+        pass
+    def step(self):
+        pass
 def getConfig(yaml_file_path="config.yaml"):
     yaml_file_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), yaml_file_path)
     with open(yaml_file_path, 'r') as file:
@@ -16,7 +21,10 @@ def getConfig(yaml_file_path="config.yaml"):
 
 def getLRScheduler(optim):
     conf = getConfig()
-    class_lr = getattr(torch.optim.lr_scheduler, conf["lr_scheduler"]["type"])
+    if conf["lr_scheduler"]["type"] != "-":
+        class_lr = getattr(torch.optim.lr_scheduler, conf["lr_scheduler"]["type"])
+    else:
+        class_lr = DummyLR
     return class_lr(optim,conf["lr_scheduler"]["step"], conf["lr_scheduler"]["gamma"])         
 
 def getOptim(exclude:list):
@@ -26,7 +34,6 @@ def getOptim(exclude:list):
     instances = []
     for class_name in class_names:
         if hasattr(optimizer, class_name):
-        
             class_ = getattr(optimizer, class_name)            
             instances.append(class_)
         else:

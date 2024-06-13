@@ -27,10 +27,10 @@ kpi:
   - name: "gpu_mem"
     unit: "MB"
     fqn: "GPU Memory usage"
-    plot: "graph"
+    plot: "box"
 lr_scheduler:
-  type: "CosineAnnealingLR"
-  step: 30
+  type: "-"
+  step: 2000
   gamma: 0.1
 Apollo:
   init_lr: "None"
@@ -54,7 +54,7 @@ AdaHessian:
   beta: 0.9
   warmup: 500
   weight_decay_type: "None"
-  weight_decay: 0
+  weight_decay: 0.00025
   rebound: "constant"
 AdaBelief:
   lr: 0.01
