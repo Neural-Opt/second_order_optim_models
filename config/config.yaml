@@ -7,15 +7,27 @@ kpi:
   - name: "tps"
     unit: "ms"
     fqn: "Time per step"
+    plot: "box"
+  - name: "ttc"
+    unit: "epochs"
+    fqn: "Time till convergence"
+    plot: "graph"
   - name: "acc_train"
     unit: "%"
     fqn: "Training Accuracy"
+    plot: "graph"
+  - name: "acc_test"
+    unit: "%"
+    fqn: "Test Accuracy"
+    plot: "graph"
   - name: "train_loss"
     unit: ""
     fqn: "Train Loss"
+    plot: "graph"
   - name: "gpu_mem"
     unit: "MB"
     fqn: "GPU Memory usage"
+    plot: "graph"
 lr_scheduler:
   type: "CosineAnnealingLR"
   step: 30
@@ -30,10 +42,10 @@ Apollo:
   weight_decay: 0
   rebound: "constant"
 Adam:
-  lr: 0.01
+  lr: 0.001
   beta1: 0.9
   beta2: 0.999
-  eps: 0.0001
+  eps: 0.00000001
   weight_decay: 0
 AdaHessian:
   init_lr: "None"

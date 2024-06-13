@@ -3,6 +3,7 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable 
 import numpy as np
 def eval():
+    run = 1
     optimizers = [ 'SGD','Apollo','Adam','AdamW','AdaBelief']
     runs_to_include = ['test']
     data_dict = {f"{k}\nSpeed (TPS)":[] for k in runs_to_include}
@@ -11,8 +12,8 @@ def eval():
 
     for set in runs_to_include:
          for optim in optimizers:
-            sgd_ref = BenchmarkState(f"./runs/{set}/1/SGD/benchmark.json")
-            state = BenchmarkState(f"./runs/{set}/1/{optim}/benchmark.json")
+            sgd_ref = BenchmarkState(f"./runs/{set}/{run}/SGD/benchmark.json")
+            state = BenchmarkState(f"./runs/{set}/{run}/{optim}/benchmark.json")
             tps_curr_set = np.mean(np.array(state.get("tps")))
             tps_ref_sgd = np.mean(np.array(sgd_ref.get("tps")))
             gpu_mem_curr_set = np.mean(np.array(state.get("gpu_mem")))

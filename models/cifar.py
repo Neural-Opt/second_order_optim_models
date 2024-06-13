@@ -3,8 +3,9 @@ from models.benchmarkset import BenchmarkSet
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader, random_split
 import torch.nn as nn
-
-
+import torch
+import numpy as np
+import random
 class CIFAR(BenchmarkSet):
     def __init__(self,batch_size=16,dataset="cifar10") -> None:
         super().__init__()
@@ -20,7 +21,15 @@ class CIFAR(BenchmarkSet):
         pass
     def setup(self,):
         pass
-    def getDataLoader(self,):       
+    def seed_worker(worker_id):
+        worker_seed = torch.initial_seed() % 2**32
+        np.random.seed(worker_seed)
+        random.seed(worker_seed)
+
+    def getDataLoader(self,):   
+        g = torch.Generator()
+        g.manual_seed(404)
+    
         trainset = self.dataset(self.conf["dataset"]["path"], train=True, download=True,
                        transform=transforms.Compose([
                            transforms.RandomCrop(32, padding=4),
@@ -37,9 +46,9 @@ class CIFAR(BenchmarkSet):
         train_size = int(0.8 * len(trainset))
         val_size = len(trainset) - train_size
         train_dataset, val_dataset = random_split(trainset, [train_size, val_size])
-        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=1)
-        val_loader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=1)
-        test_loader = DataLoader(testset, batch_size=self.batch_size, shuffle=False, num_workers=1)
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
+        val_loader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
+        test_loader = DataLoader(testset, batch_size=self.batch_size, shuffle=False, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
         return (train_loader ,test_loader , val_loader)
     def getAssociatedModel(self):
         model = models.resnet18()

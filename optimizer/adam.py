@@ -5,6 +5,7 @@ class Adam(Optimizer):
     def __init__(self, params, lr=1e-3, beta1=0.9, beta2=0.999, eps=1e-8, weight_decay=0):
         # Initialize the parameter groups and defaults
         defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps, weight_decay=weight_decay)
+        print(defaults)
         super(Adam, self).__init__(params, defaults)
     
     @torch.no_grad()
@@ -39,13 +40,28 @@ class Adam(Optimizer):
                 if group['weight_decay'] != 0:
                     grad = grad.add(p.data, alpha=group['weight_decay'])
                 # Update running averages of gradient and squared gradient
+                #m_t+1 = (b1)*m_t + (1-b1)*g_t
                 exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
+                #v_t+1 = (b2)*v_t + (1-b2)*v_t^2
                 exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
 
                 denom = exp_avg_sq.sqrt().add_(group['eps'])
+                bias_correction1 = 1 - beta1 ** state['step']
+                bias_correction2 = 1 - beta2 ** state['step']
 
+                exp_avg_hat = exp_avg / bias_correction1 #m_hat
+                exp_avg_sq_hat = exp_avg_sq / bias_correction2 #v_hat
+
+                denom = exp_avg_sq_hat.sqrt().add_(group['eps']) # sqrt(v_hat)
+                """
+                Alternatively we could use this:
+                denom = exp_avg_sq.sqrt().add_(group['eps'])
                 step_size = group['lr'] * (1 - beta2 ** state['step']) ** 0.5 / (1 - beta1 ** state['step'])
-
+                although this doesnt correctly scale 'eps' when factoring sqrt(1/(1-b_2**t)) out of the denominator it
+                uses less memory though and is about 20% faster.
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
+                """
+
+                p.data.addcdiv_(exp_avg_hat, denom, value=-group['lr'])
 
         return loss
