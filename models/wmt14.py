@@ -1,5 +1,6 @@
 
 import torch
+from benchmark.benchmark import Benchmark
 from config.loader import getConfig
 from models.benchmarkset import BenchmarkSet
 from torch.utils.data import DataLoader
@@ -81,11 +82,14 @@ class WMT14(BenchmarkSet):
 
     def train(self, model, device, train_loader, optimizer, criterion,lr_scheduler):
         model.train()
+        benchmark = Benchmark.getInstance(None)
+
         avg_loss = MeanAggregator()
         accuracy = MeanAggregator()
 
-        translated = []
         for batch in train_loader:
+            benchmark.stepStart()
+            benchmark.measureGPUMemUsageStart()
             optimizer.zero_grad()
 
             input_ids = batch['input_ids'].to(device)
@@ -100,18 +104,23 @@ class WMT14(BenchmarkSet):
             loss = outputs.loss
             loss.backward()
             optimizer.step()
+            lr_scheduler.step()
             preds = torch.argmax(outputs.logits, dim=-1)
-      
+            benchmark.measureGPUMemUsageEnd()
             mask = labels != self.tokenizer.pad_token_id
             correct = (preds[mask] == labels[mask]).sum().item()
           
             accuracy(correct/mask.sum().item())
             avg_loss(loss.item())
-        
+            benchmark.stepEnd()
+        benchmark.addTrainAcc(accuracy.get())
+        benchmark.addTrainLoss(avg_loss.get())
+        benchmark.flush()
         return avg_loss.get(), accuracy.get()      
     @torch.no_grad()
     def test(self,model, device, test_loader, criterion):
         model.eval()
+        benchmark = Benchmark.getInstance(None)
         accuracy = MeanAggregator()
 
         for batch in test_loader:
@@ -127,6 +136,7 @@ class WMT14(BenchmarkSet):
             correct = (preds[mask] == labels[mask]).sum().item()
             
             accuracy(correct/mask.sum().item())
+        benchmark.addTestAcc(accuracy.get())
         return accuracy.get()
     def translate(self, model,device, sentence: str) -> str:
         
