@@ -8,7 +8,7 @@ from utils.utils import MeanAggregator
 from log.Logger import Logger
 from tqdm import tqdm
 
-num_epochs = 4
+num_epochs = 25
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -49,7 +49,7 @@ def main():
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["AdaBelief","AdaHessian","AdamW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
+    names,optimizers,params = getOptim(["AdaBelief","AdaHessian","SGD","Apollo","AdamW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
         set_seed(404)

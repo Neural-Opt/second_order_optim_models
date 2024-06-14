@@ -1,8 +1,8 @@
 runs:
   dir: "./runs"
 dataset:
-  name: "cifar10"
-  path: "./data/cifar10"
+  name: "tinyimagenet"
+  path: "./data/tinyimagenet"
 kpi:
   - name: "tps"
     unit: "ms"

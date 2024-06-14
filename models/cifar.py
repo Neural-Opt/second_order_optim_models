@@ -88,6 +88,7 @@ class CIFAR(BenchmarkSet):
         benchmark.flush()
 
         return avg_loss.get(), accuracy.get()
+    @torch.no_grad()
     def test(self,model, device, test_loader, criterion):
         model.eval()
         benchmark = Benchmark.getInstance(None)
