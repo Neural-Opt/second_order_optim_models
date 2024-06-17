@@ -1,3 +1,4 @@
+import os
 from benchmark.benchmark import Benchmark
 from config.loader import getOptim,getLRScheduler
 from models.demux import getBenchmarkSet
@@ -6,9 +7,11 @@ import random
 import numpy as np
 from utils.utils import MeanAggregator
 from log.Logger import Logger
+import torch.distributed as dist
+import torch.multiprocessing as mp
+
 from tqdm import tqdm
 
-num_epochs = 25
 def set_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
@@ -19,6 +22,14 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+def ddp_setup(rank, world_size):
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '12355'
+
+    dist.init_process_group("nccl", rank=rank, world_size=world_size)
+
+def ddp_cleanup():
+    dist.destroy_process_group()
 
 def validate(model, device, val_loader, criterion):
     model.eval()
@@ -42,7 +53,10 @@ def validate(model, device, val_loader, criterion):
 
 
 
-def main():
+def main(rank,world_size,num_epochs = 25):
+    ddp_setup(rank,world_size)
+    set_seed(404)
+
     logger = Logger("test")
    
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -53,8 +67,7 @@ def main():
 
     for optim_class, name in zip(optimizers, names):
         set_seed(404)
-        model  = dataset.getAssociatedModel()
-        model = model.to(device)
+        model  = dataset.getAssociatedModel(rank)
         optim = optim_class(model.parameters(),**params[name])
 
         logger.setup(optim=name)
@@ -76,6 +89,12 @@ def main():
         logger.trash()
     
     logger.plot(names=names)
+    ddp_cleanup()
+
 if __name__ == "__main__":
-    set_seed(404)
-    main()
+    world_size = torch.cuda.device_count()
+    num_epochs = 25
+    mp.spawn(main,
+             args=(world_size,num_epochs),
+             nprocs=world_size,
+             join=True)

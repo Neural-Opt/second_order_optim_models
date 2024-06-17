@@ -2,7 +2,9 @@ from benchmark.benchmark import Benchmark
 from config.loader import getConfig
 from models.benchmarkset import BenchmarkSet
 from torchvision import datasets, transforms, models
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader,DistributedSampler, random_split
+from torch.nn.parallel import DistributedDataParallel as DDP
+
 import torch.nn as nn
 import torch
 import numpy as np
@@ -49,14 +51,16 @@ class CIFAR(BenchmarkSet):
         train_size = int(0.8 * len(trainset))
         val_size = len(trainset) - train_size
         train_dataset, val_dataset = random_split(trainset, [train_size, val_size])
-        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
-        val_loader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
-        test_loader = DataLoader(testset, batch_size=self.batch_size, shuffle=False, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
+        train_loader = DataLoader(train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g,sampler=DistributedSampler(train_dataset))
+        val_loader = DataLoader(val_dataset, batch_size=self.batch_size, shuffle=False, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g,sampler=DistributedSampler(val_dataset))
+        test_loader = DataLoader(testset, batch_size=self.batch_size, shuffle=False, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g,sampler=DistributedSampler(testset))
         return (train_loader ,test_loader , val_loader)
-    def getAssociatedModel(self):
+    def getAssociatedModel(self,rank):
         model = models.resnet18()
         model.fc = nn.Linear(model.fc.in_features, self.num_classes)
-        return model
+        model = model.to(rank)
+        ddp_model = DDP(model, device_ids=[rank])
+        return ddp_model
     def getAssociatedCriterion(self):
         return nn.CrossEntropyLoss()
     def train(self, model, device, train_loader, optimizer, criterion,lr_scheduler):
