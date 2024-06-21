@@ -24,5 +24,30 @@ def eval():
             data_dict[f"{set}\nSpeed (TPS)"].append(speed_x)
             data_dict[f"{set}\nMemory (GPU)"].append(mem_x)
     makeTable(head=optimizers,data= data_dict)
-print(BenchmarkAnalyzer.var("test","Adam"))
-eval()
+def print_table(column_names, row_names, data):
+    column_widths = [max(len(str(item)) for item in column) for column in zip(*data)]
+    column_widths = [max(len(name), width) for name, width in zip(column_names, column_widths)]
+
+    header = "| " + " | ".join(f"{name:<{width}}" for name, width in zip(column_names, column_widths)) + " |"
+    separator = "+-" + "-+-".join("-" * width for width in column_widths) + "-+"
+
+    print(separator)
+    print(header)
+    print(separator)
+    for row_name, row_data in zip(row_names, data):
+        row = "| " + " | ".join(f"{str(item):<{width}}" for item, width in zip(row_data, column_widths)) + " |"
+        print(row)
+        print(separator)
+
+
+
+# Example usage
+column_names = ["Name", "Age", "Occupation"]
+row_names = ["Row1", "Row2", "Row3"]
+data = [
+    ["Alice", 30, "Engineer"],
+    ["Bob", 25, "Artist"],
+    ["Charlie", 35, "Doctor"]
+]
+
+print_table(column_names, row_names, data)

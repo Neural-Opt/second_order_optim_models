@@ -1,8 +1,9 @@
 runs:
+  name: "test"
   dir: "./runs"
 dataset:
-  name: "tinyimagenet"
-  path: "./data/tinyimagenet"
+  name: "cifar10"
+  path: "./data/cifar10"
 kpi:
   - name: "tps"
     unit: "ms"
@@ -48,14 +49,15 @@ Adam:
   eps: 0.00000001
   weight_decay: 0
 AdaHessian:
-  init_lr: "None"
-  lr: 0.01
+  lr: 0.1
+  beta1: 0.9
+  beta2: 0.999
   eps: 0.0001
-  beta: 0.9
-  warmup: 500
-  weight_decay_type: "None"
-  weight_decay: 0.00025
-  rebound: "constant"
+  weight_decay: 0
+  init_lr: 0.0
+  hessian_power: 1.0
+  update_each: 1
+  warmup: 0
 AdaBelief:
   lr: 0.01
   beta1: 0.9
@@ -63,20 +65,16 @@ AdaBelief:
   eps: 0.0001
   weight_decay: 0
 AdamW:
-  lr: 0.01
+  lr: 0.001
   beta1: 0.9
   beta2: 0.999
-  eps: 0.0001
+  eps: 0.00000001
   weight_decay: 0
-RMSProp:
-  init_lr: "None"
+RMSprop:
   lr: 0.01
-  eps: 0.0001
-  beta: 0.9
-  warmup: 500
-  weight_decay_type: "None"
+  alpha: 0.99
+  eps: 0.00000001
   weight_decay: 0
-  rebound: "constant"
 SGD:
   lr: 0.01
   momentum: 0

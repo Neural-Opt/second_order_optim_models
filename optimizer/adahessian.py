@@ -22,17 +22,17 @@ class AdaHessian(Optimizer):
         num_threads (int, optional) -- number of threads for distributed training (default: 1)
     """
 
-    def __init__(self, params, lr=0.1, betas=(0.9, 0.999), eps=1e-4, weight_decay=0.0,
+    def __init__(self, params, lr=0.1,beta1=0.9,beta2=0.999 , eps=1e-4, weight_decay=0.0,
                  warmup=0, init_lr=0.0, hessian_power=1.0, update_each=1,
                  num_threads=1, average_conv_kernel=False):
         if not 0.0 <= lr:
             raise ValueError(f"Invalid learning rate: {lr}")
         if not 0.0 <= eps:
             raise ValueError(f"Invalid epsilon value: {eps}")
-        if not 0.0 <= betas[0] < 1.0:
-            raise ValueError(f"Invalid beta parameter at index 0: {betas[0]}")
-        if not 0.0 <= betas[1] < 1.0:
-            raise ValueError(f"Invalid beta parameter at index 1: {betas[1]}")
+        if not 0.0 <= beta1< 1.0:
+            raise ValueError(f"Invalid beta parameter at index 0: {beta1}")
+        if not 0.0 <= beta2 < 1.0:
+            raise ValueError(f"Invalid beta parameter at index 1: {beta2}")
         if not 0.0 <= warmup:
             raise ValueError("Invalid warmup updates: {}".format(warmup))
         if not 0.0 <= init_lr <= 1.0:
@@ -44,7 +44,7 @@ class AdaHessian(Optimizer):
         self.num_threads = num_threads
         self.average_conv_kernel = average_conv_kernel
 
-        defaults = dict(lr=lr, betas=betas, eps=eps, warmup=warmup, init_lr=init_lr, base_lr=lr,
+        defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps, warmup=warmup, init_lr=init_lr, base_lr=lr,
                         weight_decay=weight_decay, hessian_power=hessian_power)
         super(AdaHessian, self).__init__(params, defaults)
 
@@ -141,7 +141,8 @@ class AdaHessian(Optimizer):
                 p.mul_(1 - curr_lr * group['weight_decay'])
 
                 exp_avg, exp_hessian_diag_sq = state['exp_avg'], state['exp_hessian_diag_sq']
-                beta1, beta2 = group['betas']
+                beta1 = group['beta1']
+                beta2 = group['beta2']
                 state['step'] += 1
 
                 # Decay the first and second moment running average coefficient

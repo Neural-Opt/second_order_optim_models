@@ -1,11 +1,13 @@
 import time
-import torch
+import subprocess
 from benchmark.state import BenchmarkState
 from utils.utils import MeanAggregator
-
+import numpy as np
 class Benchmark:
     _instance = None
     def __init__(self,state: BenchmarkState) -> None:
+        self.averageStepTime = None
+        self.averageMemory = None
         self.state = state
         pass
     def __getstate__(self) -> object:
@@ -28,6 +30,7 @@ class Benchmark:
         loss_train =  self.state.get("train_loss")
         loss_train = loss_train if loss_train != None else []
         loss_train.append(loss)
+
         self.state.set("train_loss",loss_train)
     def addTestAcc(self,acc):
         acc_test =  self.state.get("acc_test")
@@ -35,17 +38,26 @@ class Benchmark:
         acc_test.append(acc)
         self.state.set("acc_test",acc_test)
 
-    def measureGPUMemUsageStart(self,):
-        self.averageMemory = MeanAggregator(measure=lambda mem:mem)
-        torch.cuda.reset_peak_memory_stats()
-        self.memory_allocated_before = torch.cuda.memory_allocated()
+   
+    def measureGPUMemUsage(self,rank):
+        self.averageMemory =  MeanAggregator(measure=lambda mem:mem) if  self.averageMemory == None else self.averageMemory
+        try:
+            result = subprocess.run(['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader,nounits'],
+                                    stdout=subprocess.PIPE, text=True)
+            
+            memory_usages = result.stdout.strip().split('\n')
+            memory_usages = [int(mem) for mem in memory_usages]
+            
+            if rank == "cuda":
+                self.averageMemory(np.max(np.array(memory_usages)))
+            else:
+                self.averageMemory(int(memory_usages[int(rank)]))
 
-    def measureGPUMemUsageEnd(self,):
-        self.max_memory = torch.cuda.max_memory_allocated()
-        difference = max(self.max_memory - self.memory_allocated_before,0) / 1024**2
-        self.averageMemory(difference)
-    
-    def flush(self,):
+        except Exception as e:
+ 
+            return None
+ 
+    def flush(self):
         tps =  self.state.get("tps")
         gpu_mem =  self.state.get("gpu_mem")
 
@@ -62,8 +74,8 @@ class Benchmark:
         self.state.set("gpu_mem",gpu_mem)
 
     @staticmethod
-    def getInstance(state:BenchmarkState):
-        if not Benchmark._instance:
+    def getInstance(state: BenchmarkState):
+        if Benchmark._instance  == None:
             Benchmark._instance = Benchmark(state)
         return Benchmark._instance
     @staticmethod

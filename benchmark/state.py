@@ -1,15 +1,19 @@
 import pickle
 import threading
-import time
+import torch
 
 # A thread-safe class to handle dictionary persistence
 class BenchmarkState:
-    def __init__(self, file_path):
-        self.file_path = file_path
+    def __init__(self,file_path=None):
         self.data = {}
         self.lock = threading.Lock()
-        self.load()
+        if file_path:
+            self.setup(file_path)
 
+    def setup(self,file_path):
+        self.file_path = file_path
+       
+        self.load()
     def dump(self,):
         return self.data
     def load(self):
@@ -18,7 +22,7 @@ class BenchmarkState:
                 with open(self.file_path, 'rb') as file:
                     self.data = pickle.load(file)
             except FileNotFoundError:
-                self.data = {}
+                pass
 
     def save(self):
         with self.lock:
@@ -26,26 +30,16 @@ class BenchmarkState:
                 pickle.dump(self.data, file)
 
     def set(self, key, value):
-
         with self.lock:
             self.data[key] = value
-            threading.Thread(target=self.save).start()
 
     def get(self, key, default=None):
         with self.lock:
             return self.data.get(key, default)
 
-    def delete(self, key):
+    def delete(self, key,):
         with self.lock:
             if key in self.data:
                 del self.data[key]
                 threading.Thread(target=self.save).start()
 
-    def __getitem__(self, key,default=None):
-       with self.lock:
-            return self.data.get(key, default)
-    
-    def __setitem__(self, key, value):
-       with self.lock:
-            self.data[key] = value
-            threading.Thread(target=self.save).start()

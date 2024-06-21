@@ -1,12 +1,13 @@
 import os
 from benchmark.benchmark import Benchmark
-from config.loader import getOptim,getLRScheduler
+from benchmark.state import BenchmarkState
+from config.loader import getConfig, getOptim,getLRScheduler
 from models.demux import getBenchmarkSet
 import torch
 import random
 import numpy as np
 from utils.utils import MeanAggregator
-from log.Logger import Logger
+from log.Logger import Logger, createNewRun
 import torch.distributed as dist
 import torch.multiprocessing as mp
 
@@ -27,7 +28,7 @@ def ddp_setup(rank, world_size):
     os.environ['MASTER_PORT'] = '12355'
 
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
-
+    torch.cuda.set_device(rank)
 def ddp_cleanup():
     dist.destroy_process_group()
 
@@ -53,48 +54,51 @@ def validate(model, device, val_loader, criterion):
 
 
 
-def main(rank,world_size,num_epochs = 25):
-    ddp_setup(rank,world_size)
+def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
+   # ddp_setup(rank,world_size)
     set_seed(404)
 
-    logger = Logger("test")
+    logger = Logger(base_path=base_path,rank=device,world_size=world_size)
    
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["AdaBelief","AdaHessian","SGD","Apollo","AdamW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
+    names,optimizers,params = getOptim(["AdaBelief","Apollo","AdamW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
         set_seed(404)
-        model  = dataset.getAssociatedModel(rank)
+        model  = dataset.getAssociatedModel(device)
         optim = optim_class(model.parameters(),**params[name])
 
         logger.setup(optim=name)
         lr_scheduler = getLRScheduler(optim)
-    
-        with tqdm(total=num_epochs, desc='Training Progress', unit='epoch') as epoch_bar:
-            for epoch in range(num_epochs):
-               
-                train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion, lr_scheduler)
-                test_acc = dataset.test(model, device, test_loader, criterion)
+        if device == 0 or device == "cuda":
+            epoch_bar = tqdm(total=num_epochs, desc='Training Progress', unit='epoch')
 
-                epoch_bar.set_postfix({'optim':f'{name}',
-                                       'loss': f'{train_loss:.4f}',
-                                        'train-accuracy': f'{train_acc:.4f}',
-                                        'test-accuracy': f'{test_acc:.4f}',
-                                        })
+        for epoch in range(num_epochs):
+            train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion, lr_scheduler)
+            test_acc = dataset.test(model, device, test_loader, criterion)
+            if device == 0 or device == "cuda":
+                epoch_bar.set_postfix({'optim': f'{name}',
+                                  'loss': f'{train_loss:.4f}',
+                                  'train-accuracy': f'{train_acc:.4f}',
+                                  'test-accuracy': f'{test_acc:.4f}'})
                 epoch_bar.update(1)
-        
+           
+        if device == 0 or device == "cuda":
+            epoch_bar.close()
         logger.trash()
-    
-    logger.plot(names=names)
-    ddp_cleanup()
+        logger.save(optim=name)
+    if device == 0 or device == "cuda":
+        logger.plot(names=names)
+    if device != "cuda":
+        ddp_cleanup()
 
 if __name__ == "__main__":
+    conf = getConfig()
     world_size = torch.cuda.device_count()
-    num_epochs = 25
-    mp.spawn(main,
-             args=(world_size,num_epochs),
-             nprocs=world_size,
-             join=True)
+    base_path = createNewRun(f"{conf['runs']['dir']}/{conf['runs']['name']}")
+    num_epochs = 5
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    main(device,base_path,world_size,num_epochs)
+  

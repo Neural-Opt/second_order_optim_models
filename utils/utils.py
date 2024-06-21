@@ -22,6 +22,7 @@ class MeanAggregator:
         self.measure_result = np.append(self.measure_result,[self.measure(*args)])
         if total != 0:
             self.total += total
+        return np.mean(self.measure_result)
     def get(self):
         return np.mean(self.measure_result)
 class VarianceAggregator:

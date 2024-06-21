@@ -19,7 +19,6 @@ class Plotter():
                 kpi = list(filter(lambda x: x["name"] == k,kpis))[0]
                 ax = self.axs.flatten()[i]
                 value = self.data[optim][k]
-                print(k,value)
                 if kpi['plot'] == "graph":
                     ax.plot(np.arange(len(value)),value, label=optim)
                 elif kpi['plot'] == "box":
