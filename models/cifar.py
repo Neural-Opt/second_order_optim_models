@@ -62,29 +62,28 @@ class CIFAR(BenchmarkSet):
         return ddp_model
     def getAssociatedCriterion(self):
         return nn.CrossEntropyLoss()
-    def train(self, model, device, train_loader, optimizer, criterion,lr_scheduler):
+    def train(self, model, device, train_loader, optimizer, criterion,lr_scheduler,create_graph):
         model.train()
         benchmark = Benchmark.getInstance(None)
         accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
         avg_loss = MeanAggregator()
         for inputs, targets in train_loader:
+            benchmark.measureGPUMemUsageStart(rank=device)
             benchmark.stepStart()
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, targets)
-            loss.backward(create_graph=True) 
+            loss.backward(create_graph=create_graph) 
             optimizer.step()
             lr_scheduler.step()
             _, predicted = outputs.max(1)
-           
-
-            benchmark.measureGPUMemUsage(rank=device)
 
             avg_loss(loss.item())
             accuracy(predicted,targets)
             benchmark.stepEnd()
-        
+            benchmark.measureGPUMemUsageEnd(rank=device)
+
         benchmark.addTrainAcc(accuracy.get())
         benchmark.addTrainLoss(avg_loss.get())
         benchmark.flush()

@@ -3,15 +3,16 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable 
 import numpy as np
 def eval():
-    run = 1
-    optimizers = [ 'SGD','Apollo','Adam','AdamW','AdaBelief']
+    run = 3
+    optimizers = [ 'SGD','Adam','AdaHessian',"Apollo"]
     runs_to_include = ['test']
-    data_dict = {f"{k}\nSpeed (TPS)":[] for k in runs_to_include}
-    data_dict.update({f"{k}\nMemory (GPU)": [] for k in runs_to_include})
+    cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
+    cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
+    rows = []
 
-
-    for set in runs_to_include:
-         for optim in optimizers:
+    for optim in optimizers:
+        row = [optim]
+        for set in runs_to_include:
             sgd_ref = BenchmarkState(f"./runs/{set}/{run}/SGD/benchmark.json")
             state = BenchmarkState(f"./runs/{set}/{run}/{optim}/benchmark.json")
             tps_curr_set = np.mean(np.array(state.get("tps")))
@@ -21,9 +22,14 @@ def eval():
         
             speed_x = f"{tps_curr_set/tps_ref_sgd:.4f}"
             mem_x = f"{gpu_mem_curr_set/gpu_mem_ref_sgd:.4f}"
-            data_dict[f"{set}\nSpeed (TPS)"].append(speed_x)
-            data_dict[f"{set}\nMemory (GPU)"].append(mem_x)
-    makeTable(head=optimizers,data= data_dict)
+            row.append(speed_x)
+            row.append(mem_x)
+           # data_dict[f"{set}\nSpeed (TPS)"].append(speed_x)
+            #data_dict[f"{set}\nMemory (GPU)"].append(mem_x)
+        rows.append(row)
+    
+    print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
+    #makeTable(head=optimizers,data= data_dict)
 def print_table(column_names, row_names, data):
     column_widths = [max(len(str(item)) for item in column) for column in zip(*data)]
     column_widths = [max(len(name), width) for name, width in zip(column_names, column_widths)]
@@ -42,12 +48,6 @@ def print_table(column_names, row_names, data):
 
 
 # Example usage
-column_names = ["Name", "Age", "Occupation"]
-row_names = ["Row1", "Row2", "Row3"]
-data = [
-    ["Alice", 30, "Engineer"],
-    ["Bob", 25, "Artist"],
-    ["Charlie", 35, "Doctor"]
-]
 
-print_table(column_names, row_names, data)
+
+eval()

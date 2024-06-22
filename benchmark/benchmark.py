@@ -3,6 +3,7 @@ import subprocess
 from benchmark.state import BenchmarkState
 from utils.utils import MeanAggregator
 import numpy as np
+import torch
 class Benchmark:
     _instance = None
     def __init__(self,state: BenchmarkState) -> None:
@@ -13,7 +14,7 @@ class Benchmark:
     def __getstate__(self) -> object:
         return self.state
     def stepStart(self,):
-        self.averageStepTime = MeanAggregator(measure=lambda time:time)
+        self.averageStepTime = MeanAggregator(measure=lambda time:time) if  self.averageStepTime == None else  self.averageStepTime
         self.start_time = time.perf_counter()
         pass
     def stepEnd(self,):
@@ -38,25 +39,13 @@ class Benchmark:
         acc_test.append(acc)
         self.state.set("acc_test",acc_test)
 
-   
-    def measureGPUMemUsage(self,rank):
-        self.averageMemory =  MeanAggregator(measure=lambda mem:mem) if  self.averageMemory == None else self.averageMemory
-        try:
-            result = subprocess.run(['nvidia-smi', '--query-gpu=memory.used', '--format=csv,noheader,nounits'],
-                                    stdout=subprocess.PIPE, text=True)
-            
-            memory_usages = result.stdout.strip().split('\n')
-            memory_usages = [int(mem) for mem in memory_usages]
-            
-            if rank == "cuda":
-                self.averageMemory(np.max(np.array(memory_usages)))
-            else:
-                self.averageMemory(int(memory_usages[int(rank)]))
-
-        except Exception as e:
- 
-            return None
- 
+    def measureGPUMemUsageStart(self,rank):
+        self.averageMemory =  MeanAggregator(measure=lambda mem:mem) if  self.averageMemory == None else  self.averageMemory
+        torch.cuda.reset_peak_memory_stats(device=rank)
+    def measureGPUMemUsageEnd(self,rank):
+        reserved = torch.cuda.max_memory_reserved(device=rank)
+        alloc = torch.cuda.max_memory_allocated(device=rank)
+        self.averageMemory((reserved+alloc)/1024**2)
     def flush(self):
         tps =  self.state.get("tps")
         gpu_mem =  self.state.get("gpu_mem")

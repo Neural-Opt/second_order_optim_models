@@ -2,6 +2,22 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
+def print_table(column_names, row_names, data):
+    column_widths = [max(len(str(item)) for item in column) for column in zip(*data)]
+    column_widths = [max(len(name), width) for name, width in zip(column_names, column_widths)]
+
+    header = "| " + " | ".join(f"{name:<{width}}" for name, width in zip(column_names, column_widths)) + " |"
+    separator = "+-" + "-+-".join("-" * width for width in column_widths) + "-+"
+
+    print(separator)
+    print(header)
+    print(separator)
+    for row_name, row_data in zip(row_names, data):
+        row = "| " + " | ".join(f"{str(item):<{width}}" for item, width in zip(row_data, column_widths)) + " |"
+        print(row)
+        print(separator)
+
+
 def makeTable(head,data,name="result_table",):
     data['Cost (×SGD)'] = head
     """  data = {
