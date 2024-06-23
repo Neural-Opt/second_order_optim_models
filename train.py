@@ -63,7 +63,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["AdaBelief","AdamW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
+    names,optimizers,params = getOptim(["AdaBelief","AdamW","ApolloW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
         set_seed(404)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     conf = getConfig()
     world_size = torch.cuda.device_count()
     base_path = createNewRun(f"{conf['runs']['dir']}/{conf['runs']['name']}")
-    num_epochs = 5
+    num_epochs = conf['runs']['epochs']
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     main(device,base_path,world_size,num_epochs)
   

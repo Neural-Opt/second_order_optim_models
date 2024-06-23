@@ -23,19 +23,21 @@ def getLRScheduler(optim):
     conf = getConfig()
     if conf["lr_scheduler"]["type"] != "-":
         class_lr = getattr(torch.optim.lr_scheduler, conf["lr_scheduler"]["type"])
+        return class_lr(optim,**conf["lr_scheduler"]["params"])  
     else:
-        class_lr = DummyLR
-    return class_lr(optim,conf["lr_scheduler"]["step"], conf["lr_scheduler"]["gamma"])         
+        return DummyLR(optim)
 
 def getOptim(exclude:list):
     params = getConfig()
-    class_names = ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
-    class_names = [i for i in class_names if i not in exclude]
+    optim_params={}
+    class_names = [i for i in params["optim"].keys() if i not in exclude]
+    class_names = class_names + [class_names.pop(class_names.index("AdaHessian"))] if "AdaHessian" in class_names else class_names
     instances = []
     for class_name in class_names:
-        if hasattr(optimizer, class_name):
-            class_ = getattr(optimizer, class_name)            
+        if hasattr(optimizer, params["optim"][class_name]["name"]):
+            class_ = getattr(optimizer, params["optim"][class_name]["name"])            
             instances.append(class_)
+            optim_params[class_name] = params["optim"][class_name]["params"]
         else:
             print(f"Class {class_name} not found in {optimizer.__name__}.")
-    return (class_names,instances,params)
+    return (class_names,instances,optim_params)
