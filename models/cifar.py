@@ -26,6 +26,7 @@ class CIFAR(BenchmarkSet):
         pass
     def setup(self,):
         pass
+    @staticmethod
     def seed_worker(worker_id):
         worker_seed = torch.initial_seed() % 2**32
         np.random.seed(worker_seed)
@@ -62,7 +63,7 @@ class CIFAR(BenchmarkSet):
         return ddp_model
     def getAssociatedCriterion(self):
         return nn.CrossEntropyLoss()
-    def train(self, model, device, train_loader, optimizer, criterion,lr_scheduler,create_graph):
+    def train(self, model, device, train_loader, optimizer, criterion,create_graph):
         model.train()
         benchmark = Benchmark.getInstance(None)
         accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
@@ -76,7 +77,6 @@ class CIFAR(BenchmarkSet):
             loss = criterion(outputs, targets)
             loss.backward(create_graph=create_graph) 
             optimizer.step()
-            lr_scheduler.step()
             _, predicted = outputs.max(1)
 
             avg_loss(loss.item())

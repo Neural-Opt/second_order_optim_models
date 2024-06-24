@@ -10,11 +10,11 @@ import random
 from utils.utils import MeanAggregator
 
 class TinyImageNet(BenchmarkSet):
-    def __init__(self, batch_size=16) -> None:
+    def __init__(self, batch_size=256) -> None:
         super().__init__()
         self.conf = getConfig()
         self.batch_size = batch_size
-        self.num_classes = 1000
+        self.num_classes = 200
 
     def log(self):
         pass
@@ -58,40 +58,40 @@ class TinyImageNet(BenchmarkSet):
         val_loader = DataLoader(valset, batch_size=self.batch_size, shuffle=False, num_workers=4, worker_init_fn=TinyImageNet.seed_worker, generator=g)
         test_loader = DataLoader(testset, batch_size=self.batch_size, shuffle=False, num_workers=4, worker_init_fn=TinyImageNet.seed_worker, generator=g)
         
-        return train_loader, test_loader, val_loader
+        return (train_loader, test_loader, val_loader)
 
-    def getAssociatedModel(self):
-        model = models.resnet18(pretrained=False)
+    def getAssociatedModel(self,rank):
+        model = models.resnet18()
         model.fc = nn.Linear(model.fc.in_features, self.num_classes)
-        return model
+        model.to(rank)
+        ddp_model = torch.nn.DataParallel(model)
+        return ddp_model
 
     def getAssociatedCriterion(self):
         return nn.CrossEntropyLoss()
 
-    def train(self, model, device, train_loader, optimizer, criterion, lr_scheduler):
+    def train(self, model, device, train_loader, optimizer, criterion, create_graph):
         model.train()
         benchmark = Benchmark.getInstance(None)
         accuracy = MeanAggregator(measure=lambda *args: (args[0].eq(args[1]).sum().item() / args[1].size(0)))
         avg_loss = MeanAggregator()
-        
         for inputs, targets in train_loader:
+            benchmark.measureGPUMemUsageStart(device)
             benchmark.stepStart()
-            benchmark.measureGPUMemUsageStart()
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, targets)
-            loss.backward()
+            loss.backward(create_graph=create_graph)
             optimizer.step()
-            lr_scheduler.step()
             _, predicted = outputs.max(1)
 
-            benchmark.measureGPUMemUsageEnd()
 
             avg_loss(loss.item())
             accuracy(predicted, targets)
             benchmark.stepEnd()
-        
+            benchmark.measureGPUMemUsageEnd(device)
+
         benchmark.addTrainAcc(accuracy.get())
         benchmark.addTrainLoss(avg_loss.get())
         benchmark.flush()
@@ -104,7 +104,6 @@ class TinyImageNet(BenchmarkSet):
         benchmark = Benchmark.getInstance(None)
 
         accuracy = MeanAggregator(measure=lambda *args: (args[0].eq(args[1]).sum().item() / args[1].size(0)))
-        avg_loss = MeanAggregator()
 
         with torch.no_grad():
             for inputs, targets in test_loader:

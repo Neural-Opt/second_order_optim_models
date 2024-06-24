@@ -2,9 +2,9 @@ import torch
 from torch.optim import Optimizer
 
 class Adam(Optimizer):
-    def __init__(self, params, lr=1e-3, beta1=0.9, beta2=0.999, eps=1e-8, weight_decay=0):
+    def __init__(self, params, lr=1e-3, beta1=0.9, beta2=0.999, eps=1e-8,weight_decouple=False,weight_decay=0):
         # Initialize the parameter groups and defaults
-        defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps, weight_decay=weight_decay)
+        defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps,weight_decouple=weight_decouple, weight_decay=weight_decay)
         print(defaults)
         super(Adam, self).__init__(params, defaults)
     
@@ -37,8 +37,11 @@ class Adam(Optimizer):
                 beta2 = group['beta2']
 
                 state['step'] += 1
-                if group['weight_decay'] != 0:
+                if group['weight_decay'] != 0 and group['weight_decouple']:
+                    p.data.mul_(1 - group['weight_decay'] * group['lr'])
+                elif group['weight_decay'] != 0:
                     grad = grad.add(p.data, alpha=group['weight_decay'])
+
                 # Update running averages of gradient and squared gradient
                 #m_t+1 = (b1)*m_t + (1-b1)*g_t
                 exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
@@ -64,5 +67,5 @@ class Adam(Optimizer):
              
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
                
-
+        print(loss)
         return loss

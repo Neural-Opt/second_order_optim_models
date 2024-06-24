@@ -63,7 +63,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["AdaBelief","AdamW","ApolloW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
+    names,optimizers,params = getOptim(["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
         set_seed(404)
@@ -76,7 +76,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
             epoch_bar = tqdm(total=num_epochs, desc='Training Progress', unit='epoch')
 
         for epoch in range(num_epochs):
-            train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion, lr_scheduler,name=="AdaHessian")
+            train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion,name=="AdaHessian")
             test_acc = dataset.test(model, device, test_loader, criterion)
             if device == 0 or device == "cuda":
                 epoch_bar.set_postfix({'optim': f'{name}',
@@ -84,7 +84,8 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
                                   'train-accuracy': f'{train_acc:.4f}',
                                   'test-accuracy': f'{test_acc:.4f}'})
                 epoch_bar.update(1)
-           
+            lr_scheduler.step()
+            
         if device == 0 or device == "cuda":
             epoch_bar.close()
         logger.trash()

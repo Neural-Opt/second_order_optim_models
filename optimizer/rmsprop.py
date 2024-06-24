@@ -33,11 +33,11 @@ class RMSprop(Optimizer):
 
                 square_avg.mul_(alpha).addcmul_(grad, grad, value=1 - alpha)
 
-                avg = square_avg.sqrt().add_(group['eps'])
+                avg = square_avg.sqrt().add(group['eps'])
 
                 if group['weight_decay'] != 0:
                     grad = grad.add(p.data, alpha=group['weight_decay'])
 
                 p.data.addcdiv_(grad, avg, value=-group['lr'])
-
+       
         return loss

@@ -3,9 +3,9 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable 
 import numpy as np
 def eval():
-    run = 3
-    optimizers = [ 'SGD','Adam','AdaHessian',"Apollo"]
-    runs_to_include = ['test']
+    run = 1
+    optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief','AdaHessian',"RMSprop"]
+    runs_to_include = ['cifar-10-steplr']
     cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
     cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
     rows = []
