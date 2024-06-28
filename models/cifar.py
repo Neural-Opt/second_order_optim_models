@@ -65,6 +65,7 @@ class CIFAR(BenchmarkSet):
         return nn.CrossEntropyLoss()
     def train(self, model, device, train_loader, optimizer, criterion,create_graph):
         model.train()
+        print("CIFAR")
         benchmark = Benchmark.getInstance(None)
         accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
         avg_loss = MeanAggregator()

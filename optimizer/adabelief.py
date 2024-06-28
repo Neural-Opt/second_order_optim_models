@@ -52,12 +52,11 @@ class AdaBelief(Optimizer):
                 if group['amsgrad']:
                     max_exp_avg_sq = state['max_exp_avg_sq']
                     torch.max(max_exp_avg_sq, exp_avg_sq, out=max_exp_avg_sq)
-                    denom = (max_exp_avg_sq.sqrt() / (1 - beta2 ** state['step'])).add_(group['eps'])
+                    denom = max_exp_avg_sq.sqrt().add_(group['eps'])
                 else:
-                    denom = (exp_avg_sq.sqrt() / (1 - beta2 ** state['step'])).add_(group['eps'])
+                    denom = exp_avg_sq.sqrt().add_(group['eps'])
 
-                bias_correction1 = 1 - beta1 ** state['step']
-                step_size = group['lr'] / bias_correction1
+                step_size = group['lr'] * (1 - beta2 ** state['step']) ** 0.5 / (1 - beta1 ** state['step'])
 
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
 

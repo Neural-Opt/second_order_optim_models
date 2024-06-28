@@ -67,5 +67,4 @@ class Adam(Optimizer):
              
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
                
-        print(loss)
         return loss

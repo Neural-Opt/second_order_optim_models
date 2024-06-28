@@ -38,33 +38,61 @@ class VarianceAggregator:
     def get(self):
         return np.var(self.measure_result)
     
+
+"""
+a = [q]
+b = [b]
+a = a.append(b)
+a == [[q],[b]]
+"""
 class BenchmarkAnalyzer:
     @staticmethod
     def getRunCount(dir):
         return sum(os.path.isdir(os.path.join(f"./runs/{dir}", d)) for d in os.listdir(f"./runs/{dir}")) 
     @staticmethod
-    def getAllData(dir,dirCount,optim):
+    def getAllData(dir,dirCount,optim,join=False):
         state_collector = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json").dump()
-        for _ in range(2,dirCount+1):
+        state_collector = {key: [] for key in state_collector}
+        keys = state_collector.keys()
+
+        for _ in range(1,2+1):
             state = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json")
-            for key in state_collector.keys():
-                state_collector[key] = state_collector[key]+state[key]
-        return state_collector
+            for key in keys:
+                if join:
+                    state_collector[key] = state_collector[key] + state[key]
+                else:
+                    state_collector[key].append(state[key])
+        return {key: np.array(state_collector[key]) for key in state_collector}
+
     @staticmethod
-    def var(setName,optim):
-        joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim)
+    def var(setName,optim,join=False,reducer=lambda x:x):
+        joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim,join=join)
         for key in joined.keys():
-            joined[key] =  np.var(np.array(joined[key]))
+            joined[key] =  np.var(reducer(joined[key]),axis=0 )
         return joined
     @staticmethod
-    def mean(setName,optim):
-        joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim)
+    def mean(setName,optim,join=False,reducer=lambda x:x):
+        joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim,join=join)
         for key in joined.keys():
-            joined[key] =  np.mean(np.array(joined[key]))
+            joined[key] =  np.mean(reducer(joined[key]),axis=0 )
         return joined
     @staticmethod
-    def std(setName,optim):
-        joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim)
+    def std(setName,optim,join=False,reducer=lambda x:x):
+        joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim,join=join)
         for key in joined.keys():
-            joined[key] =  np.std(np.array(joined[key]))
+            joined[key] =  np.std(reducer(joined[key]),axis=0 )
         return joined
+    
+    @staticmethod
+    def merge(filePaths,mergePath,merge_override = True):
+        out = {}
+        for path in filePaths:
+            for _, dirnames, _ in os.walk(path):
+                for optim in dirnames:
+                    if not merge_override and optim in out:
+                        raise Exception("merge_override is False")
+                    out[optim] = BenchmarkState(f"{filePaths}/{optim}/benchmark.json")
+        for optim in out.keys():
+            state = out[optim]
+            state.setup(f"{mergePath}/{optim}/benchmark.json")
+            state.save()
