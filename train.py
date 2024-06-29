@@ -66,7 +66,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
     names,optimizers,params = getOptim(["AdaHessian","AdamW","Apollo","ApolloW","RMSprop","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
-        set_seed(404)
+        set_seed(606)
         model  = dataset.getAssociatedModel(device)
         optim = optim_class(model.parameters(),**params[name])
 
