@@ -1,10 +1,10 @@
 runs:
   epochs: 164
-  name: "cifar10-steplr"
+  name: "wmt14-steplr"
   dir: "./runs"
 dataset:
-  name: "cifar10-steplr"
-  path: "./data/cifar10"
+  name: "wmt14-steplr"
+  path: "./data/wmt14"
 kpi:
   - name: "tps"
     unit: "ms"
@@ -61,7 +61,7 @@ optim:
   Adam:
     name: "Adam"
     params:
-      lr: 0.001
+      lr: 0.0001
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001

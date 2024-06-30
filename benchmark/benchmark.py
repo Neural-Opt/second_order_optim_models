@@ -38,7 +38,11 @@ class Benchmark:
         acc_test = acc_test if acc_test != None else []
         acc_test.append(acc)
         self.state.set("acc_test",acc_test)
-
+    def add(self,key,value):
+        v = self.state.get(key)
+        v = v if v != None else []
+        v.append(value)
+        
     def measureGPUMemUsageStart(self,rank):
         self.averageMemory =  MeanAggregator(measure=lambda mem:mem) if  self.averageMemory == None else  self.averageMemory
         torch.cuda.reset_peak_memory_stats(device=rank)

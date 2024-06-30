@@ -85,8 +85,8 @@ class CIFAR(BenchmarkSet):
             benchmark.stepEnd()
             benchmark.measureGPUMemUsageEnd(rank=device)
 
-        benchmark.addTrainAcc(accuracy.get())
-        benchmark.addTrainLoss(avg_loss.get())
+        benchmark.add("acc_train",accuracy.get())
+        benchmark.add("train_loss",avg_loss.get())
         benchmark.flush()
        
         return avg_loss.get(), accuracy.get()
@@ -104,6 +104,6 @@ class CIFAR(BenchmarkSet):
                 _, predicted = outputs.max(1)
                 accuracy(predicted,targets)
 
-            benchmark.addTestAcc(accuracy.get())
+            benchmark.add("acc_test",accuracy.get())
         return accuracy.get()
         
