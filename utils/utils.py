@@ -55,7 +55,7 @@ class BenchmarkAnalyzer:
         state_collector = {key: [] for key in state_collector}
         keys = state_collector.keys()
 
-        for _ in range(1,2+1):
+        for _ in range(1,dirCount+1):
             state = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json")
             for key in keys:
                 if join:

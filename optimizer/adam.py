@@ -48,20 +48,7 @@ class Adam(Optimizer):
                 #v_t+1 = (b2)*v_t + (1-b2)*v_t^2
                 exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
 
-             
-                """
-                Alternatively we could use this:
-                denom = exp_avg_sq.sqrt().add_(group['eps'])
-                bias_correction1 = 1 - beta1 ** state['step']
-                bias_correction2 = 1 - beta2 ** state['step']
-
-                exp_avg_hat = exp_avg / bias_correction1 #m_hat
-                exp_avg_sq_hat = exp_avg_sq / bias_correction2 #v_hat
-
-                denom = exp_avg_sq_hat.sqrt().add_(group['eps']) # sqrt(v_hat)
-                The current approach doesnt correctly scale 'eps' when factoring sqrt(1/(1-b_2**t)) out of the denominator it
-                but it uses less  memory though and is about 20% faster.
-                """
+        
                 denom = exp_avg_sq.sqrt().add_(group['eps'])
                 step_size = group['lr'] * (1 - beta2 ** state['step']) ** 0.5 / (1 - beta1 ** state['step'])
              

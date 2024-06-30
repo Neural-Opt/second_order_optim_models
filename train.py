@@ -56,17 +56,18 @@ def validate(model, device, val_loader, criterion):
 
 def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
    # ddp_setup(rank,world_size)
-    set_seed(404)
+    seed = 606
+    set_seed(seed)
 
     logger = Logger(base_path=base_path,rank=device,world_size=world_size)
    
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["AdaHessian","AdamW","Apollo","ApolloW","RMSprop","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
+    names,optimizers,params = getOptim([])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
-        set_seed(606)
+        set_seed(seed)
         model  = dataset.getAssociatedModel(device)
         optim = optim_class(model.parameters(),**params[name])
 
@@ -77,7 +78,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
 
         for epoch in range(num_epochs):
             train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion,name=="AdaHessian")
-            test_acc = dataset.test(model, device, test_loader, criterion)
+            test_acc =0# dataset.test(model, device, test_loader, criterion)
             if device == 0 or device == "cuda":
                 epoch_bar.set_postfix({'optim': f'{name}',
                                   'loss': f'{train_loss:.4f}',
