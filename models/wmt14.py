@@ -107,7 +107,6 @@ class WMT14(BenchmarkSet):
             benchmark.stepEnd()
             benchmark.measureGPUMemUsageEnd(rank=device)
 
-       # print(self.translate(self.model,device, "You will be aware from the press and television that there have been a number of bomb explosions and killings in Sri Lanka."))
         benchmark.add("acc_train",accuracy.get())
         benchmark.add("train_loss",avg_loss.get())
         benchmark.flush()
@@ -143,10 +142,6 @@ class WMT14(BenchmarkSet):
             inputs = self.tokenizer([sentence], return_tensors="pt", padding=True).to(device)
             translated = model.generate(**inputs)
         txt = self.tokenizer.batch_decode(translated, skip_special_tokens=False)[0]
-
-
-        # Compute BLEU score
-       # score = bleu_score(candidates, references)
 
         print(txt)
         return txt
