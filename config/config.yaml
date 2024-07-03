@@ -13,7 +13,7 @@ kpi:
   - name: "ttc"
     unit: "epochs"
     fqn: "Time till convergence"
-    plot: "graph"
+    plot: "bar"
   - name: "acc_train"
     unit: "%"
     fqn: "Training Accuracy"

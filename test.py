@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from benchmark.postprocess import PostProcessor
 from config.loader import getConfig
+from log.Logger import Logger
 #import tikzplotlib
 
 class Plotter():
@@ -38,4 +40,12 @@ class Plotter():
       #  tikzplotlib.save(f'{base_file}/result-tex.tex')
 
 
+optim= ['Adam','Apollo','ApolloW']
+l = Logger(rank="cuda",world_size=1, base_path="./runs/cifar10-steplr/1")
+data = l.getData()
+
+[PostProcessor(data[opt]) for opt in optim ]
+
+p = Plotter(optim,data)
+p.plot(base_file="./runs/cifar10-steplr/1")
 #tikzplotlib

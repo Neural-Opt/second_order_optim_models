@@ -52,3 +52,15 @@ def eval_acc():
 # Example usage
 eval_acc()
 #print(eval_kpis())
+
+state =BenchmarkAnalyzer.mean(set,"Adam",join=False,reducer=lambda x: x[:,x.shape[1] - 1:])
+data = np.array(state["acc_train"])
+thresh = 0.05
+for i in range(len(data),0,-1):
+    min, max = np.min(data[i:len(data)]), np.max(data[i:len(data)])
+    if abs(1-max/min) > thresh and i > 0:
+        state["ttc"] = i+1
+    else:
+          state["ttc"] = -1
+
+print(  state["ttc"] )

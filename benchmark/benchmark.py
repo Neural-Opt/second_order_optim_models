@@ -1,5 +1,6 @@
 import time
 import subprocess
+from benchmark.postprocess import PostProcessor
 from benchmark.state import BenchmarkState
 from utils.utils import MeanAggregator
 import numpy as np
@@ -42,7 +43,9 @@ class Benchmark:
         v = self.state.get(key)
         v = v if v != None else []
         v.append(value)
-        
+    def postProcess(self):
+        PostProcessor(self.state)
+                
     def measureGPUMemUsageStart(self,rank):
         self.averageMemory =  MeanAggregator(measure=lambda mem:mem) if  self.averageMemory == None else  self.averageMemory
         torch.cuda.reset_peak_memory_stats(device=rank)

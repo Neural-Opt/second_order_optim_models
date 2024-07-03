@@ -11,7 +11,6 @@ def CPUMemory():
 def GPUMemory():
     return psutil.virtual_memory().used / 1024**3
 
-
 class MeanAggregator:
     def __init__(self,measure:Callable=lambda x:x) -> None:
         self.total = 0
@@ -25,6 +24,7 @@ class MeanAggregator:
         return np.mean(self.measure_result)
     def get(self):
         return np.mean(self.measure_result)
+
 class VarianceAggregator:
     def __init__(self,measure:Callable=lambda x:x) -> None:
         self.total = 0
