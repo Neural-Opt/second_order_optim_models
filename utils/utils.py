@@ -4,6 +4,7 @@ from typing import Callable, Any
 import numpy as np
 import os
 
+from benchmark.postprocess import PostProcessor
 from benchmark.state import BenchmarkState
 
 def CPUMemory():
@@ -53,11 +54,11 @@ class BenchmarkAnalyzer:
     def getAllData(dir,dirCount,optim,join=False):
         state_collector = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json").dump()
         state_collector = {key: [] for key in state_collector}
-        keys = state_collector.keys()
-
+        state_collector["ttc"] = []
         for _ in range(1,dirCount+1):
             state = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json")
-            for key in keys:
+            PostProcessor(state)
+            for key in state.dump().keys():
                 if join:
                     state_collector[key] = state_collector[key] + state[key]
                 else:

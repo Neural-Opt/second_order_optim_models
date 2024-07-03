@@ -40,12 +40,12 @@ class Plotter():
       #  tikzplotlib.save(f'{base_file}/result-tex.tex')
 
 
-optim= ['Adam','Apollo','ApolloW']
-l = Logger(rank="cuda",world_size=1, base_path="./runs/cifar10-steplr/1")
+optim= ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
+l = Logger(rank="cuda",world_size=1, base_path="./runs/cifar10-steplr/5")
 data = l.getData()
 
 [PostProcessor(data[opt]) for opt in optim ]
 
 p = Plotter(optim,data)
-p.plot(base_file="./runs/cifar10-steplr/1")
+p.plot(base_file="./runs/cifar10-steplr/5")
 #tikzplotlib
