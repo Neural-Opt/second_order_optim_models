@@ -1,6 +1,7 @@
 from benchmark.benchmark import Benchmark
 from config.loader import getConfig
 from models.benchmarkset import BenchmarkSet
+from models.resnet.resnet110 import ResNet110
 from torchvision import datasets, transforms, models
 from torch.utils.data import DataLoader,DistributedSampler, random_split
 from torch.nn.parallel import DistributedDataParallel as DP
@@ -56,10 +57,11 @@ class CIFAR(BenchmarkSet):
         test_loader = DataLoader(testset, batch_size=self.batch_size, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
         return (train_loader ,test_loader , val_loader)
     def getAssociatedModel(self,rank):
-        model = models.resnet18()
-        model.fc = nn.Linear(model.fc.in_features, self.num_classes)
+        model =  ResNet110(num_classes=self.num_classes)      
         model = model.to(rank)
         ddp_model = torch.nn.DataParallel(model)#, device_ids=[rank])
+        print(f"Number of params: {sum(p.numel() for p in model.parameters())}")
+
         return ddp_model
     def getAssociatedCriterion(self):
         return nn.CrossEntropyLoss()

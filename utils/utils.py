@@ -55,9 +55,9 @@ class BenchmarkAnalyzer:
         state_collector = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json").dump()
         state_collector = {key: [] for key in state_collector}
         state_collector["ttc"] = []
-        for _ in range(1,dirCount+1):
-            state = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json")
-            PostProcessor(state)
+        for i in range(1,dirCount+1):
+            state = BenchmarkState(f"./runs/{dir}/{i}/{optim}/benchmark.json")
+            PostProcessor(state)        
             for key in state.dump().keys():
                 if join:
                     state_collector[key] = state_collector[key] + state[key]
@@ -75,6 +75,7 @@ class BenchmarkAnalyzer:
     def mean(setName,optim,join=False,reducer=lambda x:x):
         joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim,join=join)
         for key in joined.keys():
+            
             joined[key] =  np.mean(reducer(joined[key]),axis=0 )
         return joined
     @staticmethod

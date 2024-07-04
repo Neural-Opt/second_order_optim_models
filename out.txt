@@ -1,7 +1,0 @@
-Files already downloaded and verified
-Files already downloaded and verified
-{'lr': 0.001, 'beta1': 0.9, 'beta2': 0.999, 'eps': 1e-08, 'weight_decay': 0}
-Files already downloaded and verified
-Files already downloaded and verified
-{'lr': 0.001, 'beta1': 0.9, 'beta2': 0.999, 'eps': 1e-08, 'weight_decay': 0}
-Gathering for  1

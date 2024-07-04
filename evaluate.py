@@ -58,8 +58,8 @@ def eval_convergence():
     for optim in optimizers:
         row = [optim]
         for set in runs_to_include:
-            mean_state = BenchmarkAnalyzer.mean(set,optim,join=False,reducer=lambda x: x[:,x.shape[1] - 1:])
-            std_state = BenchmarkAnalyzer.std(set,optim,join=False,reducer=lambda x: x[:,x.shape[1] - 1:])
+            mean_state = BenchmarkAnalyzer.mean(set,optim,join=False)
+            std_state = BenchmarkAnalyzer.std(set,optim,join=False)
             row.append(f"{round( mean_state['ttc'].item(),4)} ± {round(std_state['ttc'].item(),3)}")
         rows.append(row)
     
@@ -67,4 +67,5 @@ def eval_convergence():
 
 # Example usage
 eval_convergence()
+eval_acc()
 #print(eval_kpis())

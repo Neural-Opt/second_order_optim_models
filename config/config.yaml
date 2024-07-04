@@ -1,10 +1,10 @@
 runs:
   epochs: 164
-  name: "wmt14-steplr"
+  name: "cifar10-steplr"
   dir: "./runs"
 dataset:
-  name: "wmt14-steplr"
-  path: "./data/wmt14"
+  name: "cifar10-steplr"
+  path: "./data/cifar10"
 kpi:
   - name: "tps"
     unit: "ms"
@@ -13,7 +13,7 @@ kpi:
   - name: "ttc"
     unit: "epochs"
     fqn: "Time till convergence"
-    plot: "bar"
+    plot: "graph"
   - name: "acc_train"
     unit: "%"
     fqn: "Training Accuracy"
@@ -61,11 +61,11 @@ optim:
   Adam:
     name: "Adam"
     params:
-      lr: 0.0001
+      lr: 0.001
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.25
   AdaHessian:
     name: "AdaHessian"
     params:
@@ -85,7 +85,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.25
   AdamW:
     name: "Adam"
     params:
@@ -93,7 +93,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.25
       weight_decouple: True
   RMSprop:
     name: "RMSprop"
