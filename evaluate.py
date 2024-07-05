@@ -68,4 +68,5 @@ def eval_convergence():
 # Example usage
 eval_convergence()
 eval_acc()
+eval_kpis()
 #print(eval_kpis())

@@ -43,6 +43,7 @@ class Benchmark:
         v = self.state.get(key)
         v = v if v != None else []
         v.append(value)
+        self.state.set(key,v)
     def postProcess(self):
         PostProcessor(self.state)
                 

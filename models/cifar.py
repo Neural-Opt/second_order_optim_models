@@ -98,14 +98,18 @@ class CIFAR(BenchmarkSet):
         benchmark = Benchmark.getInstance(None)
 
         accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
-
+        avg_loss = MeanAggregator()
         with torch.no_grad():
             for inputs, targets in test_loader:
                 inputs, targets = inputs.to(device), targets.to(device)
                 outputs = model(inputs)
+                loss = criterion(outputs, targets)
+
                 _, predicted = outputs.max(1)
+                avg_loss(loss.item())
                 accuracy(predicted,targets)
 
             benchmark.add("acc_test",accuracy.get())
+            benchmark.add("test_loss",avg_loss.get())
         return accuracy.get()
         

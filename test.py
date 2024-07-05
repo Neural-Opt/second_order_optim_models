@@ -1,71 +1,68 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from benchmark.postprocess import PostProcessor
+from benchmark.state import BenchmarkState
 from config.loader import getConfig
 from log.Logger import Logger
 from utils.utils import BenchmarkAnalyzer
-#import tikzplotlib
 
 class Plotter():
-    def __init__(self,optimizers,data) -> None:
-       # self.fig, self.axs = plt.subplots(2, 3, figsize=(12, 8))
+    def __init__(self, optimizers, data) -> None:
+        self.fig, self.axs = plt.subplots(1, 2, figsize=(14, 6))
         self.data = data
         self.optimizers = optimizers
 
-    def plot(self,metric):
+    def plot(self, metric, title, subplot_idx):
         conf = getConfig()
         kpi = list(filter(lambda x: x['name'] == metric, conf["kpi"]))[0]
-        print(kpi)
+        ax = self.axs.flat[subplot_idx]  # Get the specific subplot axis
+        print(kpi['plot'])
         if kpi['plot'] == "graph":
             for optim in self.optimizers:
-                data = self.data[optim][metric] 
-                plt.plot(np.arange(len(data)),data, label=optim)
-            plt.xlabel('Epochs')
+                data = self.data[optim][metric]
+                ax.plot(np.arange(len(data)), data, label=optim)
+            ax.set_xlabel('Epochs')
+
         elif kpi['plot'] == 'box':
             box_data = [self.data[optim][metric] for optim in self.optimizers]
-            plt.figure(figsize=(12,4))
-            plt.boxplot(box_data, patch_artist=False, notch=False, vert=True, labels=self.optimizers)
+            ax.boxplot(box_data, patch_artist=False, notch=False, vert=True, labels=self.optimizers)
         elif kpi['plot'] == 'bar':
-            plt.figure(figsize=(9,4))
             for optim in self.optimizers:
-                data = self.data[optim][metric] 
-                plt.bar([optim], self.data[optim][metric], color ='maroon')
-            plt.ylabel('Epochs')
-        plt.legend()
-     
-        plt.savefig(f'result_plot_{metric}.png')       
-  
+                data = self.data[optim][metric]
+                ax.bar([optim], self.data[optim][metric], color='maroon')
+            
 
+        ax.set_title(title)
 
-
-
-
-"""run = 5
-optim= ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
-l = Logger(rank="cuda",world_size=1, base_path=f"./runs/cifar10-steplr/{run}")
+run = 5
+optim = ["AdaBelief", "AdaHessian", "Adam", "AdamW", "Apollo", "ApolloW", "RMSprop", "SGD"]
+l = Logger(rank="cuda", world_size=1, base_path=f"./results/cifar10-steplr/{run}")
 data = l.getData()
 
-[PostProcessor(data[opt]) for opt in optim ]
-for i in range(1,6):
-    optim= ['Adam']
-    l = Logger(rank="cuda",world_size=1, base_path=f"./runs/cifar10-steplr/{i}")
-    data = l.getData()
-
-    [PostProcessor(data[opt]) for opt in optim ]
-    print(data["Adam"]["ttc"])
+[PostProcessor(data[opt]) for opt in optim]
 
 
-a = BenchmarkAnalyzer.mean("cifar10-steplr","Adam",join=False)
-v = BenchmarkAnalyzer.v("cifar10-steplr","Adam",join=False)
+print(data["AdamW"]["ttc"])
+p = Plotter(optim, data)
+metrics = ["gpu_mem", "tps",]
+titles = ["GPU Memory (MB) (milestone)", "Time per step (TPS) (milestone)"]
 
-print(a["ttc"],v["ttc"])
-p = Plotter(optim,data)
-p.plot(base_file=f"./runs/cifar10-steplr/{run}")"""
-#tikzplotlib
-optim= ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
-l = Logger(rank="cuda",world_size=1, base_path=f"./runs/cifar10-steplr/{5}")
-data = l.getData()
+# Dictionary to track unique legend entries
+legend_entries = {}
 
-[PostProcessor(data[opt]) for opt in optim ]
-p = Plotter(optim,data)
-p.plot("ttc")
+for idx, (metric, title) in enumerate(zip(metrics, titles)):
+    p.plot(metric, title, idx)
+    # Collect handles and labels from the current axis
+    handles, labels = p.axs.flat[idx].get_legend_handles_labels()
+    for handle, label in zip(handles, labels):
+        if label not in legend_entries:
+            legend_entries[label] = handle
+
+# Create a single legend at the top of the entire figure
+fig = p.fig
+print(legend_entries.keys())
+fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=3)
+
+plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
+plt.savefig('result_plot_.png')
+plt.show()

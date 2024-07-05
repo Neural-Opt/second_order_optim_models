@@ -61,7 +61,7 @@ class TinyImageNet(BenchmarkSet):
         return (train_loader, test_loader, val_loader)
 
     def getAssociatedModel(self,rank):
-        model = models.resnet18()
+        model = models.resnet50()
         model.fc = nn.Linear(model.fc.in_features, self.num_classes)
         model.to(rank)
         ddp_model = torch.nn.DataParallel(model)
