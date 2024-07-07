@@ -8,7 +8,7 @@ from utils.utils import BenchmarkAnalyzer
 
 class Plotter():
     def __init__(self, optimizers, data) -> None:
-        self.fig, self.axs = plt.subplots(1, 2, figsize=(14, 6))
+        self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 12))
         self.data = data
         self.optimizers = optimizers
 
@@ -16,7 +16,7 @@ class Plotter():
         conf = getConfig()
         kpi = list(filter(lambda x: x['name'] == metric, conf["kpi"]))[0]
         ax = self.axs.flat[subplot_idx]  # Get the specific subplot axis
-        print(kpi['plot'])
+
         if kpi['plot'] == "graph":
             for optim in self.optimizers:
                 data = self.data[optim][metric]
@@ -30,22 +30,24 @@ class Plotter():
             for optim in self.optimizers:
                 data = self.data[optim][metric]
                 ax.bar([optim], self.data[optim][metric], color='maroon')
-            
+            ax.set_ylabel('Epochs')
 
         ax.set_title(title)
 
-run = 5
-optim = ["AdaBelief", "AdaHessian", "Adam", "AdamW", "Apollo", "ApolloW", "RMSprop", "SGD"]
-l = Logger(rank="cuda", world_size=1, base_path=f"./results/cifar10-steplr/{run}")
+run = 1
+optim = ["Apollo","ApolloW","Adam","AdamW","RMSprop","SGD","AdaBelief","AdaHessian"]
+l = Logger(rank="cuda", world_size=1, base_path=f"./runs/cifar10-steplr/{run}")
 data = l.getData()
-
+print(data.keys())
 [PostProcessor(data[opt]) for opt in optim]
 
-
-print(data["AdamW"]["ttc"])
 p = Plotter(optim, data)
-metrics = ["gpu_mem", "tps",]
-titles = ["GPU Memory (MB) (milestone)", "Time per step (TPS) (milestone)"]
+metrics = metrics =  ["gpu_mem", "tps"]#["acc_train", "acc_test", "train_loss", "test_loss",] #["gpu_mem", "tps"] #
+#metrics = ["gpu_mem", "tps"]
+
+titles =["GPU Memory (MiB) (milestone)", "Time per step (TPS) (milestone)"]
+#["Training Accuracy (milestone)", "Test Accuracy (milestone)", "Train Loss (milestone)","Test Loss (milestone)"]# ["GPU Memory (MiB) (milestone)", "Time per step (TPS) (milestone)"]#
+#titles = ["GPU Memory (MiB) (milestone)", "Time per step (TPS) (milestone)"]
 
 # Dictionary to track unique legend entries
 legend_entries = {}
@@ -61,7 +63,7 @@ for idx, (metric, title) in enumerate(zip(metrics, titles)):
 # Create a single legend at the top of the entire figure
 fig = p.fig
 print(legend_entries.keys())
-fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=3)
+fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=2)
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
 plt.savefig('result_plot_.png')

@@ -49,14 +49,14 @@ a == [[q],[b]]
 class BenchmarkAnalyzer:
     @staticmethod
     def getRunCount(dir):
-        return sum(os.path.isdir(os.path.join(f"./results/{dir}", d)) for d in os.listdir(f"./results/{dir}")) 
+        return 1#sum(os.path.isdir(os.path.join(f"./runs/{dir}", d)) for d in os.listdir(f"./runs/{dir}")) 
     @staticmethod
     def getAllData(dir,dirCount,optim,join=False):
-        state_collector = BenchmarkState(f"./results/{dir}/{dirCount}/{optim}/benchmark.json").dump()
+        state_collector = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json").dump()
         state_collector = {key: [] for key in state_collector}
         state_collector["ttc"] = []
         for i in range(1,dirCount+1):
-            state = BenchmarkState(f"./results/{dir}/{i}/{optim}/benchmark.json")
+            state = BenchmarkState(f"./runs/{dir}/{i}/{optim}/benchmark.json")
             PostProcessor(state)        
             for key in state.dump().keys():
                 if join:

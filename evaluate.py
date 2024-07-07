@@ -3,9 +3,10 @@ from benchmark.state import BenchmarkState
 from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
+
+optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief',"RMSprop","AdaHessian"]
+
 def eval_kpis():
-    run = 1
-    optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief','AdaHessian',"RMSprop"]
     runs_to_include = ['cifar10-steplr']
     cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
     cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
@@ -35,8 +36,6 @@ def eval_kpis():
     #makeTable(head=optimizers,data= data_dict)
 
 def eval_acc():
-    run = 1
-    optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief','AdaHessian',"RMSprop"]
     runs_to_include = ['cifar10-steplr']
     cols = [" "]+[f"{k} - Accuracy"for k in runs_to_include]
     rows = []
@@ -50,8 +49,6 @@ def eval_acc():
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_convergence():
-    run = 1
-    optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief','AdaHessian',"RMSprop"]
     runs_to_include = ['cifar10-steplr']
     cols = [" "]+[f"{k} - TTC"for k in runs_to_include]
     rows = []

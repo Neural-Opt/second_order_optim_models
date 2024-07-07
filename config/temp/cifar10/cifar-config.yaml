@@ -22,6 +22,10 @@ kpi:
     unit: "%"
     fqn: "Test Accuracy"
     plot: "graph"
+  - name: "test_loss"
+    unit: ""
+    fqn: "Test Loss"
+    plot: "graph"
   - name: "train_loss"
     unit: ""
     fqn: "Train Loss"
@@ -56,7 +60,7 @@ optim:
       beta: 0.9
       warmup: 500
       weight_decay_type: "decoupled"
-      weight_decay: 0.00025
+      weight_decay: 0.025
       rebound: "constant"
   Adam:
     name: "Adam"
@@ -65,7 +69,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.001
   AdaHessian:
     name: "AdaHessian"
     params:
@@ -85,7 +89,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.25
+      weight_decay: 0.001
   AdamW:
     name: "Adam"
     params:
@@ -93,7 +97,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.001
       weight_decouple: True
   RMSprop:
     name: "RMSprop"
