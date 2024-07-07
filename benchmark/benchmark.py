@@ -49,12 +49,13 @@ class Benchmark:
                 
     def measureGPUMemUsageStart(self,rank):
         self.averageMemory =  MeanAggregator(measure=lambda mem:mem) if  self.averageMemory == None else  self.averageMemory
-        torch.cuda.reset_peak_memory_stats(device=rank)
+        for i in range(torch.cuda.device_count()):
+            torch.cuda.reset_peak_memory_stats(device=f'cuda:{i}')
     def measureGPUMemUsageEnd(self,rank):
-        reserved = torch.cuda.max_memory_reserved(device=rank)
-        alloc = torch.cuda.max_memory_allocated(device=rank)
-        #print("reserved: "+str(reserved/1024**2 ),"alloc: " +str(alloc/1024**2))
-        self.averageMemory((alloc)/1024**2)
+        memory_allocated = []
+        for i in range(torch.cuda.device_count()):
+            memory_allocated.append(torch.cuda.max_memory_allocated(device=f'cuda:{i}')/1024**2)
+        self.averageMemory(np.mean(np.array(memory_allocated)))
     def flush(self):
         tps =  self.state.get("tps")
         gpu_mem =  self.state.get("gpu_mem")

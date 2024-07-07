@@ -38,8 +38,8 @@ run = 1
 optim = ["Apollo","ApolloW","Adam","AdamW","RMSprop","SGD","AdaBelief","AdaHessian"]
 l = Logger(rank="cuda", world_size=1, base_path=f"./runs/cifar10-steplr/{run}")
 data = l.getData()
-print(data.keys())
-[PostProcessor(data[opt]) for opt in optim]
+print(data["SGD"]["SGD"][0],data["SGD"]["SGD"][len(data["SGD"]["SGD"])-1],)
+"""[PostProcessor(data[opt]) for opt in optim]
 
 p = Plotter(optim, data)
 metrics = metrics =  ["gpu_mem", "tps"]#["acc_train", "acc_test", "train_loss", "test_loss",] #["gpu_mem", "tps"] #
@@ -68,3 +68,4 @@ fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', b
 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
 plt.savefig('result_plot_.png')
 plt.show()
+"""
