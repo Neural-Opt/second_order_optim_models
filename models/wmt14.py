@@ -9,6 +9,7 @@ from transformers import MarianTokenizer,MarianMTModel, MarianConfig
 from sacrebleu import corpus_bleu
 import numpy as np
 from utils.utils import MeanAggregator
+from tqdm import tqdm
 
 class WMT14(BenchmarkSet):
     def __init__(self,batch_size=256) -> None:
@@ -35,7 +36,7 @@ class WMT14(BenchmarkSet):
     def preprocess(self,data):
         inputs = [ex['de'] for ex in data['translation']]
         targets = [ex['en'] for ex in data['translation']]
-        return self.tokenizer(inputs, text_target=targets, max_length=32, truncation=True, padding='max_length')
+        return self.tokenizer(inputs, text_target=targets, max_length=64, truncation=True, padding='max_length')
     def setup(self):
 
        # print(len(self.dataset['train']))
@@ -61,7 +62,6 @@ class WMT14(BenchmarkSet):
             decoder_attention_heads=8,
             d_model=512,     
     )
-        print(self.tokenizer.pad_token_id)
         self.model = MarianMTModel(config)
         self.model.to(rank)
         print(f"Number of params: {sum(p.numel() for p in self.model.parameters())}")
@@ -83,7 +83,6 @@ class WMT14(BenchmarkSet):
         accuracy = MeanAggregator()
 
         for batch in train_loader:
-        
             benchmark.measureGPUMemUsageStart(rank=device)
 
             benchmark.stepStart()
@@ -93,10 +92,10 @@ class WMT14(BenchmarkSet):
             outputs = model(
               input_ids=batch["input_ids"],
               attention_mask=batch["attention_mask"],
-              labels = torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
+              labels =torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
               )
          
-            loss =outputs.loss #self.loss_function(outputs.logits,batch['labels'])
+            loss =self.loss_function(outputs.logits,batch['labels'])
            
             loss.backward(create_graph=create_graph)
             optimizer.step()
@@ -110,6 +109,7 @@ class WMT14(BenchmarkSet):
             avg_loss(loss.item())
             benchmark.stepEnd()
             benchmark.measureGPUMemUsageEnd(rank=device)
+
 
         benchmark.add("acc_train",accuracy.get())
         benchmark.add("train_loss",avg_loss.get())
@@ -126,17 +126,21 @@ class WMT14(BenchmarkSet):
         decoded_predictions=[]
         for batch in test_loader:
             batch = {k: v.to(device) for k, v in batch.items()}
-            outputs = model(**batch)
+            preds = model.module.generate(
+              input_ids=batch["input_ids"],
+              attention_mask=batch["attention_mask"])
+             
+            decoded_references = decoded_references + [[self.tokenizer.decode(labels.tolist(), skip_special_tokens=False)] for labels in batch['labels']]
+            decoded_predictions = decoded_predictions + [self.tokenizer.decode(preds_batch.tolist(), skip_special_tokens=False) for preds_batch in preds]            
+           # accuracy(correct/(mask.sum().item()))
 
-            preds = torch.argmax(outputs.logits, dim=-1)
-            mask = batch['labels']!= self.tokenizer.pad_token_id
 
-            correct = (preds[mask] == batch['labels'][mask]).sum().item()
-            decoded_references = decoded_references + [[self.tokenizer.decode(labels.tolist(), skip_special_tokens=True)] for labels in batch['labels']]
-            decoded_predictions = decoded_predictions + [self.tokenizer.decode(preds_batch.tolist(), skip_special_tokens=True) for preds_batch in preds]            
-            accuracy(correct/mask.sum().item())
+       # benchmark.add("acc_test",accuracy.get())
 
-        benchmark.add("acc_test",accuracy.get())
+        print(f"\nREF: {decoded_references[4][0]}")
+        print(f"PRED: {decoded_predictions[4]}")
+        print(f"BLEU: {corpus_bleu([decoded_predictions[4]],[decoded_references[4]])}")
+
         sacre_bleu = corpus_bleu(decoded_predictions, decoded_references,use_effective_order=True)
        
         print(f"Bleu: {sacre_bleu.score} ")
@@ -145,7 +149,7 @@ class WMT14(BenchmarkSet):
       #  self.translate(model,device,"I am going to buy a car!")
         benchmark.add("bleu",sacre_bleu.score)
 
-        return accuracy.get()
+        return sacre_bleu.score
     def translate(self, model,device, sentence: str) -> str:
         
         model.eval()  # Set the model to evaluation mode
