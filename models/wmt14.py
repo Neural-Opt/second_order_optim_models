@@ -11,7 +11,7 @@ import numpy as np
 from utils.utils import MeanAggregator
 
 class WMT14(BenchmarkSet):
-    def __init__(self,batch_size=128) -> None:
+    def __init__(self,batch_size=256) -> None:
         super().__init__()
         self.conf = getConfig()
       # Load the WMT14 English-German dataset
@@ -33,16 +33,16 @@ class WMT14(BenchmarkSet):
         return decoded_sentences
 
     def preprocess(self,data):
-        inputs = [ex['en'] for ex in data['translation']]
-        targets = [ex['de'] for ex in data['translation']]
+        inputs = [ex['de'] for ex in data['translation']]
+        targets = [ex['en'] for ex in data['translation']]
         return self.tokenizer(inputs, text_target=targets, max_length=32, truncation=True, padding='max_length')
     def setup(self):
 
        # print(len(self.dataset['train']))
-        self.dataset['train'] =  self.dataset['train'].select(range(800))
-        self.dataset['test'] =  self.dataset['test'].select(range(1))
+        self.dataset['train'] =  self.dataset['train'].select(range(5))
+        self.dataset['test'] =  self.dataset['test'].select(range(5))
 
-        self.tokenized_datasets = self.dataset.map(self.preprocess, batched=True)
+        self.tokenized_datasets = self.dataset.map(self.preprocess, batched=True,load_from_cache_file=False)
         self.tokenized_datasets.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
     def getDataLoader(self):
         train_set = DataLoader(self.tokenized_datasets['train'], batch_size=self.batch_size, shuffle=True)
@@ -89,9 +89,14 @@ class WMT14(BenchmarkSet):
             benchmark.stepStart()
             optimizer.zero_grad()
             batch = {k: v.to(device) for k, v in batch.items()}
-            outputs = model(**batch)
 
-            loss = self.loss_function(outputs.logits,batch['labels'])
+            outputs = model(
+              input_ids=batch["input_ids"],
+              attention_mask=batch["attention_mask"],
+              labels = torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
+              )
+         
+            loss =outputs.loss #self.loss_function(outputs.logits,batch['labels'])
            
             loss.backward(create_graph=create_graph)
             optimizer.step()
@@ -134,7 +139,7 @@ class WMT14(BenchmarkSet):
         benchmark.add("acc_test",accuracy.get())
         sacre_bleu = corpus_bleu(decoded_predictions, decoded_references,use_effective_order=True)
        
-       # print(f"Bleu: {sacre_bleu.score} ")
+        print(f"Bleu: {sacre_bleu.score} ")
 
 
       #  self.translate(model,device,"I am going to buy a car!")

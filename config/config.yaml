@@ -69,7 +69,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.01
   AdaHessian:
     name: "AdaHessian"
     params:

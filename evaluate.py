@@ -4,7 +4,7 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
 
-optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief',"RMSprop","AdaHessian"]
+optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief',"RMSprop"]
 
 def eval_kpis_mean():
     runs_to_include = ['cifar10-steplr']
@@ -45,8 +45,8 @@ def eval_kpis():
             state = BenchmarkState(f"./runs/{set}/{run}/{optim}/benchmark.json")
             sgd_state = BenchmarkState(f"./runs/{set}/{run}/SGD/benchmark.json")
             PostProcessor(state) 
-            state = {key :np.array(state[key]) for key in state.keys()}
-            state = {key :np.array(sgd_state[key]) for key in sgd_state.keys()}
+            state = {key :np.array(state[key]) for key in state.dump().keys()}
+            sgd_state = {key :np.array(sgd_state[key]) for key in sgd_state.dump().keys()}
  
             speed_x, speed_x_std = np.mean(state['tps'] / sgd_state['tps']), np.std(state['tps'] / sgd_state['tps'])
             mem_x, mem_x_std = np.mean(state['gpu_mem'] / sgd_state['gpu_mem']), np.std(state['gpu_mem'] / sgd_state['gpu_mem'])
@@ -85,7 +85,5 @@ def eval_convergence():
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_convergence()
-eval_acc_mean()
-eval_kpis_mean()
+eval_kpis()
 #print(eval_kpis())

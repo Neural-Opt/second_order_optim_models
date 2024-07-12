@@ -86,12 +86,12 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
             train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion,name=="AdaHessian")
 
             #TODO replace train_set
-           # test_acc = dataset.test(model, device, train_loader, criterion)
+            test_acc = dataset.test(model, device, train_loader, criterion)
             if device == 0 or device == "cuda":
                 epoch_bar.set_postfix({'optim': f'{name}',
                                   'loss': f'{train_loss:.4f}',
                                   'train-accuracy': f'{train_acc:.4f}',
-                                  'test-accuracy': f'{train_acc:.4f}'})
+                                  'test-accuracy': f'{test_acc:.4f}'})
                                   
                 epoch_bar.update(1)
             lr_scheduler.step()
