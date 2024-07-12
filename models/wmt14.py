@@ -40,8 +40,8 @@ class WMT14(BenchmarkSet):
     def setup(self):
 
        # print(len(self.dataset['train']))
-        self.dataset['train'] =  self.dataset['train'].select(range(5))
-        self.dataset['test'] =  self.dataset['test'].select(range(5))
+        self.dataset['train'] =  self.dataset['train'].select(range(100000))
+        self.dataset['test'] =  self.dataset['test'].select(range(1000))
 
         self.tokenized_datasets = self.dataset.map(self.preprocess, batched=True,load_from_cache_file=False)
         self.tokenized_datasets.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
@@ -92,10 +92,10 @@ class WMT14(BenchmarkSet):
             outputs = model(
               input_ids=batch["input_ids"],
               attention_mask=batch["attention_mask"],
-              labels =batch['labels']#torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
+              labels =torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
               )
          
-            loss =self.loss_function(outputs.logits,batch['labels'])
+            loss =outputs.loss #self.loss_function(outputs.logits,batch['labels'])
            
             loss.backward(create_graph=create_graph)
             optimizer.step()
@@ -104,12 +104,7 @@ class WMT14(BenchmarkSet):
             mask = batch['labels'] != self.tokenizer.pad_token_id
 
             correct = (preds[mask] == batch['labels'][mask]).sum().item()
-            print(" ")
-            print("------------")
-            print(preds[0])
-            print(batch['labels'][0])
-            print("------------")
-
+          
             accuracy(correct/(mask.sum().item()))
             avg_loss(loss.item())
             benchmark.stepEnd()
@@ -142,8 +137,8 @@ class WMT14(BenchmarkSet):
 
        # benchmark.add("acc_test",accuracy.get())
 
-      #  print(f"\nREF: {decoded_references[4][0]}")
-       # print(f"PRED: {decoded_predictions[4]}")
+        #print(f"\nREF: {decoded_references[4][0]}")
+        #print(f"PRED: {decoded_predictions[4]}")
         #print(f"BLEU: {corpus_bleu([decoded_predictions[4]],[decoded_references[4]])}")
 
         sacre_bleu = corpus_bleu(decoded_predictions, decoded_references,use_effective_order=True)
