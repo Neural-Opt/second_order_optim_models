@@ -65,7 +65,7 @@ class Benchmark:
 
         tps.append(float(self.averageStepTime.get()))
         gpu_mem.append(float(self.averageMemory.get()))
-     
+       
         self.averageStepTime = None
         self.averageMemory = None
 

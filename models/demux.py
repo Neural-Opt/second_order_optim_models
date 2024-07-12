@@ -2,6 +2,7 @@ from config.loader import getConfig
 from models.cifar import CIFAR
 from models.tinyimagenet import TinyImageNet
 from models.wmt14 import WMT14
+from models.onebw import OneBW
 
 
 def getBenchmarkSet():
@@ -12,6 +13,8 @@ def getBenchmarkSet():
         return CIFAR()
     if "wmt14" in name:
         return WMT14()
+    if "onebw" in name:
+        return OneBW()
     if "tinyimagenet" in name:
         return TinyImageNet()
 

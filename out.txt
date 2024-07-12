@@ -1,0 +1,4 @@
+cuda
+Vocab size 58101
+58100
+Number of params: 42894848

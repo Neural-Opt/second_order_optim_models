@@ -1,10 +1,10 @@
 runs:
   epochs: 164
-  name: "cifar10-steplr"
+  name: "wmt14-step-lr"
   dir: "./runs"
 dataset:
-  name: "cifar10-steplr"
-  path: "./data/cifar10"
+  name: "wmt14-step-lr"
+  path: "./data/wmt14-step-lr"
 kpi:
   - name: "tps"
     unit: "ms"
@@ -37,7 +37,7 @@ kpi:
 lr_scheduler:
   type: "MultiStepLR"
   params:
-    milestones: [80,120]
+    milestones: [164]
     gamma: 0.1
 optim:
   Apollo:
@@ -65,7 +65,7 @@ optim:
   Adam:
     name: "Adam"
     params:
-      lr: 0.001
+      lr: 0.0003
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
@@ -85,15 +85,15 @@ optim:
   AdaBelief:
     name: "AdaBelief"
     params:
-      lr: 0.001
+      lr: 0.0001
       beta1: 0.9
-      beta2: 0.999
-      eps: 0.00000001
+      beta2: 0.998
+      eps: 0.0000000001
       weight_decay: 0
   AdamW:
     name: "Adam"
     params:
-      lr: 0.001
+      lr: 0.0005
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001

@@ -6,7 +6,7 @@ import numpy as np
 
 optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief',"RMSprop","AdaHessian"]
 
-def eval_kpis():
+def eval_kpis_mean():
     runs_to_include = ['cifar10-steplr']
     cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
     cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
@@ -31,11 +31,33 @@ def eval_kpis():
             row.append(f"{round(mem_x,4)} ± {round(mem_x_std,3)}")
 
         rows.append(row)
-    
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
-    #makeTable(head=optimizers,data= data_dict)
+def eval_kpis():
+    runs_to_include = ['cifar10-steplr']
+    cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
+    cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
+    rows = []
+    run = 1
 
-def eval_acc():
+    for optim in optimizers:
+        row = [optim]
+        for set in runs_to_include:
+            state = BenchmarkState(f"./runs/{set}/{run}/{optim}/benchmark.json")
+            sgd_state = BenchmarkState(f"./runs/{set}/{run}/SGD/benchmark.json")
+            PostProcessor(state) 
+            state = {key :np.array(state[key]) for key in state.keys()}
+            state = {key :np.array(sgd_state[key]) for key in sgd_state.keys()}
+ 
+            speed_x, speed_x_std = np.mean(state['tps'] / sgd_state['tps']), np.std(state['tps'] / sgd_state['tps'])
+            mem_x, mem_x_std = np.mean(state['gpu_mem'] / sgd_state['gpu_mem']), np.std(state['gpu_mem'] / sgd_state['gpu_mem'])
+
+            row.append(f"{round(speed_x,4)} ± {round(speed_x_std,3)}")
+            row.append(f"{round(mem_x,4)} ± {round(mem_x_std,3)}")
+
+        rows.append(row)
+    print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
+
+def eval_acc_mean():
     runs_to_include = ['cifar10-steplr']
     cols = [" "]+[f"{k} - Accuracy"for k in runs_to_include]
     rows = []
@@ -64,6 +86,6 @@ def eval_convergence():
 
 # Example usage
 eval_convergence()
-eval_acc()
-eval_kpis()
+eval_acc_mean()
+eval_kpis_mean()
 #print(eval_kpis())

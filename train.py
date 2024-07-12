@@ -58,19 +58,25 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
    # ddp_setup(rank,world_size)
     seed = 606
     set_seed(seed)
-
+    print(device)
     logger = Logger(base_path=base_path,rank=device,world_size=world_size)
    
     dataset = getBenchmarkSet()
     train_loader ,test_loader , val_loader = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["Apollo","AdaHessian","RMSprop","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","RMSprop","SGD"]
+    names,optimizers,params = getOptim(["AdaHessian","AdaBelief","Adam","Apollo","ApolloW","RMSprop","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
+      
         set_seed(seed)
         model  = dataset.getAssociatedModel(device)
+        model.train()
         optim = optim_class(model.parameters(),**params[name])
 
+# Adam optimizer parameters
+        #optim = torch.optim.AdamW(model.parameters(), lr=5e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0)
+
+# Learning rate scheduler
         logger.setup(optim=name)
         lr_scheduler = getLRScheduler(optim)
         if device == 0 or device == "cuda":
@@ -78,13 +84,15 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
 
         for epoch in range(num_epochs):
             train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion,name=="AdaHessian")
+
             #TODO replace train_set
-            test_acc = dataset.test(model, device, test_loader, criterion)
+           # test_acc = dataset.test(model, device, train_loader, criterion)
             if device == 0 or device == "cuda":
                 epoch_bar.set_postfix({'optim': f'{name}',
                                   'loss': f'{train_loss:.4f}',
                                   'train-accuracy': f'{train_acc:.4f}',
-                                  'test-accuracy': f'{test_acc:.4f}'})
+                                  'test-accuracy': f'{train_acc:.4f}'})
+                                  
                 epoch_bar.update(1)
             lr_scheduler.step()
             
