@@ -4,7 +4,7 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
 
-optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief',"RMSprop","AdaHessian"]
+optimizers = [ 'SGD','Adam','AdamW','AdaBelief',"RMSprop"]
 
 def eval_kpis_mean():
     runs_to_include = ['cifar10-steplr']
@@ -22,10 +22,15 @@ def eval_kpis_mean():
     for optim in optimizers:
         row = [optim]
         for set in runs_to_include:
-            sgd_state = BenchmarkAnalyzer.mean(set,"SGD")
-            state = BenchmarkAnalyzer.mean(set,optim)
-            speed_x, speed_x_std = np.mean(state['tps'] / sgd_state['tps']), np.std(state['tps'] / sgd_state['tps'])
-            mem_x, mem_x_std = np.mean(state['gpu_mem'] / sgd_state['gpu_mem']), np.std(state['gpu_mem'] / sgd_state['gpu_mem'])
+            sgd_state = BenchmarkAnalyzer.getConcatStates(set,"SGD")
+            state = BenchmarkAnalyzer.getConcatStates(set,optim)
+
+            speed_arr = (state['tps'] / sgd_state['tps']).reshape(1,-1)
+            gpu_mem_arr = (state['gpu_mem'] / sgd_state['gpu_mem']).reshape(1,-1)
+            print(gpu_mem_arr.shape)
+
+            speed_x, speed_x_std = np.mean(speed_arr), np.std(speed_arr)
+            mem_x, mem_x_std =np.mean(gpu_mem_arr), np.std(gpu_mem_arr)
 
             row.append(f"{round(speed_x,4)} ± {round(speed_x_std,3)}")
             row.append(f"{round(mem_x,4)} ± {round(mem_x_std,3)}")
@@ -64,9 +69,11 @@ def eval_acc_mean():
     for optim in optimizers:
         row = [optim]
         for set in runs_to_include:
-            mean_state = BenchmarkAnalyzer.mean(set,optim,join=False,reducer=lambda x: x[:,x.shape[1] - 1:])
-            std_state = BenchmarkAnalyzer.std(set,optim,join=False,reducer=lambda x: x[:,x.shape[1] - 1:])
-            row.append(f"{round( mean_state['acc_test'].item(),4)} ± {round(std_state['acc_test'].item(),3)}")
+            state = BenchmarkAnalyzer.getConcatStates(set,optim,reducer=lambda x: x[:,x.shape[1] - 1:])
+            accs = (state['acc_test']).reshape(1,-1)
+            acc_mean, acc_sgd = np.mean(accs), np.std(accs)
+
+            row.append(f"{round(acc_mean,4)} ± {round(acc_sgd,3)}")
         rows.append(row)
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
@@ -77,13 +84,15 @@ def eval_convergence():
     for optim in optimizers:
         row = [optim]
         for set in runs_to_include:
-            mean_state = BenchmarkAnalyzer.mean(set,optim,join=False)
-            std_state = BenchmarkAnalyzer.std(set,optim,join=False)
-            row.append(f"{round( mean_state['ttc'].item(),4)} ± {round(std_state['ttc'].item(),3)}")
+            state = BenchmarkAnalyzer.getConcatStates(set,optim)
+            ttcs = (state['ttc']).reshape(1,-1)
+            ttc_mean, ttc_sgd = np.mean(ttcs), np.std(ttcs)
+            row.append(f"{round( ttc_mean,4)} ± {round(ttc_sgd,3)}")
         rows.append(row)
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_kpis()
+eval_acc_mean()
+eval_convergence()
 #print(eval_kpis())

@@ -34,11 +34,11 @@ class Plotter():
 
         ax.set_title(title)
 
-run = 1
-optim = ["Apollo","ApolloW","Adam","AdamW","RMSprop","SGD","AdaBelief","AdaHessian"]
+run = 5
+optim = ["Adam","AdamW","RMSprop","SGD","AdaBelief"]
 l = Logger(rank="cuda", world_size=1, base_path=f"./runs/cifar10-steplr/{run}")
 data = l.getData()
-print(data["SGD"]["SGD"][0],data["SGD"]["SGD"][len(data["SGD"]["SGD"])-1],)
+print(data.keys(),)
 """[PostProcessor(data[opt]) for opt in optim]
 
 p = Plotter(optim, data)

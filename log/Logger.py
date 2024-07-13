@@ -31,7 +31,7 @@ class Logger:
     def getData(self):
         output = {}
         for d in os.listdir(self.base_path):
-            if d == "result_plot.png":
+            if d == "conf.json":
                 continue
             state = BenchmarkState(f"{os.path.join(self.base_path, d)}/benchmark.json")
             state.load()
