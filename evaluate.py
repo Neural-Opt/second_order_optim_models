@@ -4,7 +4,7 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
 
-optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief',"RMSprop"]
+optimizers = [ 'SGD','Adam','AdamW','Apollo','ApolloW','AdaBelief',"RMSprop","AdaHessian"]
 
 def eval_kpis_mean():
     runs_to_include = ['cifar10-steplr']
