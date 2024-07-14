@@ -94,7 +94,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
                                   'test-accuracy': f'{test_acc:.4f}'})
                                   
                 epoch_bar.update(1)
-            lr_scheduler.step()
+            lr_scheduler.stepEpoch()
             
         if device == 0 or device == "cuda":
             epoch_bar.close()

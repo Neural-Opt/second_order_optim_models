@@ -8,11 +8,23 @@ sys.path.append(parent_dir)
 import optimizer
 import torch.optim.lr_scheduler 
 
-class DummyLR:
-    def __init__(self,*args):
-        pass
-    def step(self):
-        pass
+class WrapperLR:
+    def __init__(self,optim,lr_scheduler,conf):
+        if lr_scheduler != None:
+            optimizer_name = optim.__class__.__name__
+            if conf["lr_scheduler"]['type'] == "CosineAnnealingLR":
+                conf["lr_scheduler"]["params"]["eta_min"] = conf["optim"][optimizer_name]["params"]['lr'] / 10e3
+            self.conf = conf
+            self.lr_scheduler = lr_scheduler(optim,**conf["lr_scheduler"]["params"])  
+    def stepEpoch(self):
+      
+        if self.lr_scheduler != None and self.conf["runs"]["lr_schedule_per_epoch"]:
+            print("STEP update")
+            self.lr_scheduler.step()
+    def stepUpdate(self):
+        if self.lr_scheduler != None and not self.conf["runs"]["lr_schedule_per_epoch"]:
+            self.lr_scheduler.step()
+
 def getConfig(yaml_file_path="config.yaml"):
     yaml_file_path =  os.path.join(os.path.dirname(os.path.abspath(__file__)), yaml_file_path)
     with open(yaml_file_path, 'r') as file:
@@ -23,9 +35,9 @@ def getLRScheduler(optim):
     conf = getConfig()
     if conf["lr_scheduler"]["type"] != "-":
         class_lr = getattr(torch.optim.lr_scheduler, conf["lr_scheduler"]["type"])
-        return class_lr(optim,**conf["lr_scheduler"]["params"])  
+        return WrapperLR(optim,class_lr,conf)#class_lr(optim,**conf["lr_scheduler"]["params"])  
     else:
-        return DummyLR(optim)
+        return WrapperLR(None,None,None)
 
 def getOptim(exclude:list):
     params = getConfig()
