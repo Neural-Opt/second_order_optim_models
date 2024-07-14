@@ -55,7 +55,7 @@ class Benchmark:
         memory_allocated = []
         for i in range(torch.cuda.device_count()):
             memory_allocated.append(torch.cuda.max_memory_allocated(device=f'cuda:{i}')/1024**2)
-        self.averageMemory(np.mean(np.array(memory_allocated)))
+        self.averageMemory(np.max(np.array(memory_allocated)))
     def flush(self):
         tps =  self.state.get("tps")
         gpu_mem =  self.state.get("gpu_mem")

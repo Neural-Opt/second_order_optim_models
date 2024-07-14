@@ -33,8 +33,7 @@ class AdamW(Optimizer):
                 beta1 = group['beta1']
                 beta2 = group['beta2']
                 state['step'] += 1
-                if group['weight_decay'] != 0:
-                    grad = grad.add(p.data, alpha=group['weight_decay'])
+             
                 # Update running averages of gradient and squared gradient
                 exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
                 exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
@@ -43,6 +42,9 @@ class AdamW(Optimizer):
 
                 step_size = group['lr'] * (1 - beta2 ** state['step']) ** 0.5 / (1 - beta1 ** state['step'])
 
+                if group['weight_decay'] != 0:
+                    p.data.mul_(1 - group['lr'] * group['weight_decay'])
+                    
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
 
         return loss

@@ -13,7 +13,7 @@ import random
 
 from utils.utils import MeanAggregator
 class CIFAR(BenchmarkSet):
-    def __init__(self,batch_size=512,dataset="cifar10") -> None:
+    def __init__(self,batch_size=64,dataset="cifar10") -> None:
         super().__init__()
         self.conf = getConfig()
         self.batch_size = batch_size

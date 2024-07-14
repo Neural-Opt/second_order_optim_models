@@ -74,7 +74,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
         optim = optim_class(model.parameters(),**params[name])
 
 # Adam optimizer parameters
-        optim = torch.optim.AdamW(model.parameters(), lr=5e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01)
+       # optim = torch.optim.AdamW(model.parameters(), lr=5e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01)
 
 # Learning rate scheduler
         logger.setup(optim=name)
@@ -88,7 +88,10 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
             #TODO replace train_set
             test_acc = dataset.test(model, device, test_loader, criterion)
             if device == 0 or device == "cuda":
+                lr = lr_scheduler.optimizer.param_groups[0]['lr']
+
                 epoch_bar.set_postfix({'optim': f'{name}',
+                                  'lr':f'{lr}',
                                   'loss': f'{train_loss:.4f}',
                                   'train-accuracy': f'{train_acc:.4f}',
                                   'test-accuracy': f'{test_acc:.4f}'})

@@ -49,7 +49,7 @@ optim:
       beta: 0.9
       warmup: 500
       weight_decay_type: "L2"
-      weight_decay:  0.00025
+      weight_decay:  0.0025
       rebound: "constant"
   ApolloW:
     name: "Apollo"
@@ -60,16 +60,8 @@ optim:
       beta: 0.9
       warmup: 500
       weight_decay_type: "decoupled"
-      weight_decay: 0.025
+      weight_decay: 0.0025
       rebound: "constant"
-  Adam:
-    name: "Adam"
-    params:
-      lr: 0.001
-      beta1: 0.9
-      beta2: 0.999
-      eps: 0.00000001
-      weight_decay: 0.00025
   AdaHessian:
     name: "AdaHessian"
     params:
@@ -77,19 +69,19 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.01
-      weight_decay: 0.001
+      weight_decay: 0.0025
       init_lr: 0.001
       hessian_power: 1.0
       update_each: 1
       warmup: 500
-  AdaBelief:
-    name: "AdaBelief"
+  Adam:
+    name: "Adam"
     params:
       lr: 0.001
       beta1: 0.9
-      beta2: 0.998
-      eps: 0.0000000001
-      weight_decay: 0.00025
+      beta2: 0.999
+      eps: 0.00000001
+      weight_decay: 0.0025
   AdamW:
     name: "Adam"
     params:
@@ -97,18 +89,29 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.025
+      weight_decay: 0.0025
       weight_decouple: True
+
+  AdaBelief:
+    name: "AdaBelief"
+    params:
+      lr: 0.001
+      beta1: 0.9
+      beta2: 0.999
+      eps: 0.0000000001
+      weight_decay: 0.0025
+      weight_decouple: True
+
   RMSprop:
     name: "RMSprop"
     params:
       lr: 0.001
       alpha: 0.99
       eps: 0.00000001
-      weight_decay: 0.00025
+      weight_decay: 0.0025
   SGD:
     name: "SGD"
     params:
       lr: 0.1
       momentum: 0
-      weight_decay: 0.00025
+      weight_decay: 0.0025

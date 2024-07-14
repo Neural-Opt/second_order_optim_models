@@ -37,10 +37,7 @@ class AdaBelief(Optimizer):
 
                 if group['weight_decay'] != 0:
                     if group['weight_decouple']:
-                        if group['fixed_decay']:
-                            p.data.mul_(1.0 - group['lr'] * group['weight_decay'])
-                        else:
-                            p.data.mul_(1.0 - group['weight_decay'])
+                        p.data.mul_(1.0 - group['lr'] * group['weight_decay'])
                     else:
                         grad = grad.add(p.data, alpha=group['weight_decay'])
 
