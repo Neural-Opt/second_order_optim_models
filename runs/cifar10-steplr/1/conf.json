@@ -92,7 +92,7 @@
         "Adam": {
             "name": "Adam",
             "params": {
-                "lr": 0.01,
+                "lr": 0.001,
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
@@ -116,7 +116,7 @@
         "AdaBelief": {
             "name": "AdaBelief",
             "params": {
-                "lr": 0.01,
+                "lr": 0.001,
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
@@ -126,7 +126,7 @@
         "AdamW": {
             "name": "Adam",
             "params": {
-                "lr": 0.01,
+                "lr": 0.001,
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
@@ -137,7 +137,7 @@
         "RMSprop": {
             "name": "RMSprop",
             "params": {
-                "lr": 0.01,
+                "lr": 0.001,
                 "alpha": 0.99,
                 "eps": 1e-08,
                 "weight_decay": 0.0025
@@ -146,7 +146,7 @@
         "SGD": {
             "name": "SGD",
             "params": {
-                "lr": 0.01,
+                "lr": 0.1,
                 "momentum": 0,
                 "weight_decay": 0.0025
             }

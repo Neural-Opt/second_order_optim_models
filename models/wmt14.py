@@ -34,14 +34,14 @@ class WMT14(BenchmarkSet):
         return decoded_sentences
 
     def preprocess(self,data):
-        inputs = [ex['de'] for ex in data['translation']]
-        targets = [ex['en'] for ex in data['translation']]
-        return self.tokenizer(inputs, text_target=targets, max_length=64, truncation=True, padding='max_length')
+        inputs = [ex['en'] for ex in data['translation']]
+        targets = [ex['de'] for ex in data['translation']]
+        return self.tokenizer(inputs, text_target=targets, max_length=128, truncation=True, padding='max_length')
     def setup(self):
 
        # print(len(self.dataset['train']))
-        self.dataset['train'] =  self.dataset['train'].select(range(100000))
-        self.dataset['test'] =  self.dataset['test'].select(range(1000))
+        self.dataset['train'] =  self.dataset['train'].select(range(50000))
+        self.dataset['test'] =  self.dataset['test'].select(range(5))
 
         self.tokenized_datasets = self.dataset.map(self.preprocess, batched=True,load_from_cache_file=False)
         self.tokenized_datasets.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
@@ -120,8 +120,6 @@ class WMT14(BenchmarkSet):
         model.eval()
         benchmark = Benchmark.getInstance(None)
 
-        accuracy = MeanAggregator()
-
         decoded_references=[]
         decoded_predictions=[]
         for batch in test_loader:
@@ -130,8 +128,8 @@ class WMT14(BenchmarkSet):
               input_ids=batch["input_ids"],
               attention_mask=batch["attention_mask"])
              
-            decoded_references = decoded_references + [[self.tokenizer.decode(labels.tolist(), skip_special_tokens=False)] for labels in batch['labels']]
-            decoded_predictions = decoded_predictions + [self.tokenizer.decode(preds_batch.tolist(), skip_special_tokens=False) for preds_batch in preds]            
+            decoded_references = decoded_references + [[self.tokenizer.decode(labels.tolist(), skip_special_tokens=True)] for labels in batch['labels']]
+            decoded_predictions = decoded_predictions + [self.tokenizer.decode(preds_batch.tolist(), skip_special_tokens=True) for preds_batch in preds]            
            # accuracy(correct/(mask.sum().item()))
 
 
@@ -145,8 +143,13 @@ class WMT14(BenchmarkSet):
        
         #print(f"Bleu: {sacre_bleu.score} ")
 
+        for i in range(5):
+        #  self.translate(model,device,"I am going to buy a car!")
 
-      #  self.translate(model,device,"I am going to buy a car!")
+            print(f"\nREF: {decoded_references[i][0]}")
+            print(f"PRED: {decoded_predictions[i]}")
+            print(f"BLEU: {corpus_bleu([decoded_predictions[i]],[decoded_references[i]],use_effective_order=True).score}")
+
         benchmark.add("bleu",sacre_bleu.score)
 
         return sacre_bleu.score

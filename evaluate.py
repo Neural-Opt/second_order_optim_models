@@ -4,7 +4,7 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
 
-optimizers = [ 'SGD','Adam','AdamW','AdaBelief',"RMSprop"]
+optimizers = [ 'Adam','AdamW','AdaBelief',"RMSprop"]
 
 def eval_kpis_mean():
     runs_to_include = ['cifar10-steplr']
@@ -77,6 +77,23 @@ def eval_acc_mean():
         rows.append(row)
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
+def eval_acc():
+    runs_to_include = ['cifar10-steplr']
+    cols = [" "]+[f"{k} - Accuracy"for k in runs_to_include]
+    rows = []
+    run = 2
+    for optim in optimizers:
+        row = [optim]
+        for set in runs_to_include:
+            state = BenchmarkAnalyzer.getConcatStates(set,optim,reducer=lambda x: x[:,x.shape[1] - 1:])
+            state['acc_test']  = state['acc_test'][run]
+            accs = (state['acc_test']).reshape(1,-1)
+            acc_mean, acc_sgd = np.mean(accs), np.std(accs)
+
+            row.append(f"{round(acc_mean,4)} ± {round(acc_sgd,3)}")
+        rows.append(row)
+    
+    print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_convergence():
     runs_to_include = ['cifar10-steplr']
     cols = [" "]+[f"{k} - TTC"for k in runs_to_include]
@@ -93,6 +110,5 @@ def eval_convergence():
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_acc_mean()
-eval_convergence()
+eval_acc()
 #print(eval_kpis())

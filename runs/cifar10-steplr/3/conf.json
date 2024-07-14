@@ -96,7 +96,7 @@
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0.025
+                "weight_decay": 0.00025
             }
         },
         "AdaHessian": {
@@ -120,7 +120,7 @@
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0.025
+                "weight_decay": 0.00025
             }
         },
         "AdamW": {
@@ -130,7 +130,7 @@
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0.025,
+                "weight_decay": 0.00025,
                 "weight_decouple": true
             }
         },
@@ -140,7 +140,7 @@
                 "lr": 0.001,
                 "alpha": 0.99,
                 "eps": 1e-08,
-                "weight_decay": 0.025
+                "weight_decay": 0.00025
             }
         },
         "SGD": {
@@ -148,7 +148,7 @@
             "params": {
                 "lr": 0.1,
                 "momentum": 0,
-                "weight_decay": 0.025
+                "weight_decay": 0.00025
             }
         }
     }

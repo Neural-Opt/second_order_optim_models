@@ -74,7 +74,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
         optim = optim_class(model.parameters(),**params[name])
 
 # Adam optimizer parameters
-        #optim = torch.optim.AdamW(model.parameters(), lr=5e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0)
+        optim = torch.optim.AdamW(model.parameters(), lr=5e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01)
 
 # Learning rate scheduler
         logger.setup(optim=name)
