@@ -83,7 +83,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
             epoch_bar = tqdm(total=num_epochs, desc='Training Progress', unit='epoch')
 
         for epoch in range(num_epochs):
-            train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion,name=="AdaHessian")
+            train_loss, train_acc = dataset.train(model, device, train_loader, optim, criterion,name=="AdaHessian",lr_scheduler)
 
             #TODO replace train_set
             test_acc = dataset.test(model, device, test_loader, criterion)

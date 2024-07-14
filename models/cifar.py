@@ -13,7 +13,7 @@ import random
 
 from utils.utils import MeanAggregator
 class CIFAR(BenchmarkSet):
-    def __init__(self,batch_size=128,dataset="cifar10") -> None:
+    def __init__(self,batch_size=512,dataset="cifar10") -> None:
         super().__init__()
         self.conf = getConfig()
         self.batch_size = batch_size
@@ -59,13 +59,14 @@ class CIFAR(BenchmarkSet):
     def getAssociatedModel(self,rank):
         model =  ResNet110(num_classes=self.num_classes)      
         model = model.to(rank)
+        
         ddp_model = torch.nn.DataParallel(model)#, device_ids=[rank])
         print(f"Number of params: {sum(p.numel() for p in model.parameters())}")
 
         return ddp_model
     def getAssociatedCriterion(self):
         return nn.CrossEntropyLoss()
-    def train(self, model, device, train_loader, optimizer, criterion,create_graph):
+    def train(self, model, device, train_loader, optimizer, criterion,create_graph,lr_scheduler):
         model.train()
         print("CIFAR")
         benchmark = Benchmark.getInstance(None)
@@ -80,6 +81,7 @@ class CIFAR(BenchmarkSet):
             loss = criterion(outputs, targets)
             loss.backward(create_graph=create_graph) 
             optimizer.step()
+            lr_scheduler.stepUpdate()
             _, predicted = outputs.max(1)
 
             avg_loss(loss.item())

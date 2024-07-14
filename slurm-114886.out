@@ -1,0 +1,97 @@
+
+The following have been reloaded with a version change:
+  1) CUDA/12.4.0 => CUDA/12.1.1
+  2) GCCcore/13.3.0 => GCCcore/12.3.0
+  3) OpenSSL/3 => OpenSSL/1.1
+  4) Python/3.12.3-GCCcore-13.3.0 => Python/3.11.3-GCCcore-12.3.0
+  5) SQLite/3.45.3-GCCcore-13.3.0 => SQLite/3.42.0-GCCcore-12.3.0
+  6) Tcl/8.6.14-GCCcore-13.3.0 => Tcl/8.6.13-GCCcore-12.3.0
+  7) XZ/5.4.5-GCCcore-13.3.0 => XZ/5.4.2-GCCcore-12.3.0
+  8) binutils/2.42-GCCcore-13.3.0 => binutils/2.40-GCCcore-12.3.0
+  9) bzip2/1.0.8-GCCcore-13.3.0 => bzip2/1.0.8-GCCcore-12.3.0
+ 10) libffi/3.4.5-GCCcore-13.3.0 => libffi/3.4.4-GCCcore-12.3.0
+ 11) libreadline/8.2-GCCcore-13.3.0 => libreadline/8.2-GCCcore-12.3.0
+ 12) ncurses/6.5-GCCcore-13.3.0 => ncurses/6.4-GCCcore-12.3.0
+ 13) zlib/1.3.1-GCCcore-13.3.0 => zlib/1.2.13-GCCcore-12.3.0
+
+/home/s6jahard/.local/lib/python3.11/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: '/home/s6jahard/.local/lib/python3.11/site-packages/torchvision/image.so: undefined symbol: _ZN3c106detail23torchInternalAssertFailEPKcS2_jS2_RKSs'If you don't plan on using image functionality from `torchvision.io`, you can ignore this warning. Otherwise, there might be something wrong with your environment. Did you have `libjpeg` or `libpng` installed before building `torchvision` from source?
+  warn(
+cuda
+Files already downloaded and verified
+Files already downloaded and verified
+Number of params: 1730714
+{'lr': 0.001, 'beta1': 0.9, 'beta2': 0.999, 'eps': 1e-08, 'weight_decouple': True, 'weight_decay': 0.025}
+1e-06
+Training Progress:   0%|          | 0/200 [00:00<?, ?epoch/s]CIFAR
+Training Progress:   0%|          | 0/200 [00:46<?, ?epoch/s, optim=AdamW, loss=2.0324, train-accuracy=0.2461, test-accuracy=0.2829]Training Progress:   0%|          | 1/200 [00:46<2:33:10, 46.18s/epoch, optim=AdamW, loss=2.0324, train-accuracy=0.2461, test-accuracy=0.2829]STEP update
+CIFAR
+Training Progress:   0%|          | 1/200 [01:05<2:33:10, 46.18s/epoch, optim=AdamW, loss=1.7033, train-accuracy=0.3673, test-accuracy=0.4142]Training Progress:   1%|          | 2/200 [01:05<1:39:22, 30.11s/epoch, optim=AdamW, loss=1.7033, train-accuracy=0.3673, test-accuracy=0.4142]STEP update
+CIFAR
+Training Progress:   1%|          | 2/200 [01:23<1:39:22, 30.11s/epoch, optim=AdamW, loss=1.5712, train-accuracy=0.4205, test-accuracy=0.4412]Training Progress:   2%|▏         | 3/200 [01:23<1:22:01, 24.98s/epoch, optim=AdamW, loss=1.5712, train-accuracy=0.4205, test-accuracy=0.4412]STEP update
+CIFAR
+Training Progress:   2%|▏         | 3/200 [01:42<1:22:01, 24.98s/epoch, optim=AdamW, loss=1.4800, train-accuracy=0.4564, test-accuracy=0.4669]Training Progress:   2%|▏         | 4/200 [01:42<1:13:53, 22.62s/epoch, optim=AdamW, loss=1.4800, train-accuracy=0.4564, test-accuracy=0.4669]STEP update
+CIFAR
+Training Progress:   2%|▏         | 4/200 [02:01<1:13:53, 22.62s/epoch, optim=AdamW, loss=1.4027, train-accuracy=0.4885, test-accuracy=0.4821]Training Progress:   2%|▎         | 5/200 [02:01<1:09:13, 21.30s/epoch, optim=AdamW, loss=1.4027, train-accuracy=0.4885, test-accuracy=0.4821]STEP update
+CIFAR
+Training Progress:   2%|▎         | 5/200 [02:21<1:09:13, 21.30s/epoch, optim=AdamW, loss=1.3308, train-accuracy=0.5155, test-accuracy=0.5254]Training Progress:   3%|▎         | 6/200 [02:21<1:06:46, 20.65s/epoch, optim=AdamW, loss=1.3308, train-accuracy=0.5155, test-accuracy=0.5254]STEP update
+CIFAR
+Training Progress:   3%|▎         | 6/200 [02:40<1:06:46, 20.65s/epoch, optim=AdamW, loss=1.2679, train-accuracy=0.5432, test-accuracy=0.5536]Training Progress:   4%|▎         | 7/200 [02:40<1:05:01, 20.22s/epoch, optim=AdamW, loss=1.2679, train-accuracy=0.5432, test-accuracy=0.5536]STEP update
+CIFAR
+Training Progress:   4%|▎         | 7/200 [02:59<1:05:01, 20.22s/epoch, optim=AdamW, loss=1.1962, train-accuracy=0.5701, test-accuracy=0.5671]Training Progress:   4%|▍         | 8/200 [02:59<1:03:47, 19.94s/epoch, optim=AdamW, loss=1.1962, train-accuracy=0.5701, test-accuracy=0.5671]STEP update
+CIFAR
+Training Progress:   4%|▍         | 8/200 [03:19<1:03:47, 19.94s/epoch, optim=AdamW, loss=1.1376, train-accuracy=0.5947, test-accuracy=0.5833]Training Progress:   4%|▍         | 9/200 [03:19<1:02:49, 19.74s/epoch, optim=AdamW, loss=1.1376, train-accuracy=0.5947, test-accuracy=0.5833]STEP update
+CIFAR
+Training Progress:   4%|▍         | 9/200 [03:38<1:02:49, 19.74s/epoch, optim=AdamW, loss=1.0844, train-accuracy=0.6143, test-accuracy=0.5790]Training Progress:   5%|▌         | 10/200 [03:38<1:02:10, 19.63s/epoch, optim=AdamW, loss=1.0844, train-accuracy=0.6143, test-accuracy=0.5790]STEP update
+CIFAR
+Training Progress:   5%|▌         | 10/200 [03:57<1:02:10, 19.63s/epoch, optim=AdamW, loss=1.0206, train-accuracy=0.6375, test-accuracy=0.5930]Training Progress:   6%|▌         | 11/200 [03:57<1:01:31, 19.53s/epoch, optim=AdamW, loss=1.0206, train-accuracy=0.6375, test-accuracy=0.5930]STEP update
+CIFAR
+Training Progress:   6%|▌         | 11/200 [04:17<1:01:31, 19.53s/epoch, optim=AdamW, loss=0.9745, train-accuracy=0.6570, test-accuracy=0.6253]Training Progress:   6%|▌         | 12/200 [04:17<1:00:49, 19.41s/epoch, optim=AdamW, loss=0.9745, train-accuracy=0.6570, test-accuracy=0.6253]STEP update
+CIFAR
+Training Progress:   6%|▌         | 12/200 [04:35<1:00:49, 19.41s/epoch, optim=AdamW, loss=0.9171, train-accuracy=0.6751, test-accuracy=0.6513]Training Progress:   6%|▋         | 13/200 [04:35<1:00:02, 19.26s/epoch, optim=AdamW, loss=0.9171, train-accuracy=0.6751, test-accuracy=0.6513]STEP update
+CIFAR
+Training Progress:   6%|▋         | 13/200 [04:55<1:00:02, 19.26s/epoch, optim=AdamW, loss=0.8793, train-accuracy=0.6900, test-accuracy=0.6342]Training Progress:   7%|▋         | 14/200 [04:55<59:45, 19.28s/epoch, optim=AdamW, loss=0.8793, train-accuracy=0.6900, test-accuracy=0.6342]  STEP update
+CIFAR
+Training Progress:   7%|▋         | 14/200 [05:14<59:45, 19.28s/epoch, optim=AdamW, loss=0.8377, train-accuracy=0.7055, test-accuracy=0.6683]Training Progress:   8%|▊         | 15/200 [05:14<59:18, 19.23s/epoch, optim=AdamW, loss=0.8377, train-accuracy=0.7055, test-accuracy=0.6683]STEP update
+CIFAR
+Training Progress:   8%|▊         | 15/200 [05:33<59:18, 19.23s/epoch, optim=AdamW, loss=0.8036, train-accuracy=0.7177, test-accuracy=0.6762]Training Progress:   8%|▊         | 16/200 [05:33<59:09, 19.29s/epoch, optim=AdamW, loss=0.8036, train-accuracy=0.7177, test-accuracy=0.6762]STEP update
+CIFAR
+Training Progress:   8%|▊         | 16/200 [05:53<59:09, 19.29s/epoch, optim=AdamW, loss=0.7685, train-accuracy=0.7307, test-accuracy=0.7028]Training Progress:   8%|▊         | 17/200 [05:53<58:43, 19.25s/epoch, optim=AdamW, loss=0.7685, train-accuracy=0.7307, test-accuracy=0.7028]STEP update
+CIFAR
+Training Progress:   8%|▊         | 17/200 [06:12<58:43, 19.25s/epoch, optim=AdamW, loss=0.7351, train-accuracy=0.7416, test-accuracy=0.6929]Training Progress:   9%|▉         | 18/200 [06:12<58:17, 19.22s/epoch, optim=AdamW, loss=0.7351, train-accuracy=0.7416, test-accuracy=0.6929]STEP update
+CIFAR
+Training Progress:   9%|▉         | 18/200 [06:31<58:17, 19.22s/epoch, optim=AdamW, loss=0.7065, train-accuracy=0.7532, test-accuracy=0.6895]Training Progress:  10%|▉         | 19/200 [06:31<57:57, 19.21s/epoch, optim=AdamW, loss=0.7065, train-accuracy=0.7532, test-accuracy=0.6895]STEP update
+CIFAR
+Training Progress:  10%|▉         | 19/200 [06:50<57:57, 19.21s/epoch, optim=AdamW, loss=0.6742, train-accuracy=0.7620, test-accuracy=0.7294]Training Progress:  10%|█         | 20/200 [06:50<57:43, 19.24s/epoch, optim=AdamW, loss=0.6742, train-accuracy=0.7620, test-accuracy=0.7294]STEP update
+CIFAR
+Training Progress:  10%|█         | 20/200 [07:09<57:43, 19.24s/epoch, optim=AdamW, loss=0.6506, train-accuracy=0.7728, test-accuracy=0.7254]Training Progress:  10%|█         | 21/200 [07:09<57:09, 19.16s/epoch, optim=AdamW, loss=0.6506, train-accuracy=0.7728, test-accuracy=0.7254]STEP update
+CIFAR
+Training Progress:  10%|█         | 21/200 [07:28<57:09, 19.16s/epoch, optim=AdamW, loss=0.6243, train-accuracy=0.7821, test-accuracy=0.7033]Training Progress:  11%|█         | 22/200 [07:28<56:46, 19.14s/epoch, optim=AdamW, loss=0.6243, train-accuracy=0.7821, test-accuracy=0.7033]STEP update
+CIFAR
+Training Progress:  11%|█         | 22/200 [07:47<56:46, 19.14s/epoch, optim=AdamW, loss=0.5990, train-accuracy=0.7917, test-accuracy=0.6801]Training Progress:  12%|█▏        | 23/200 [07:47<56:29, 19.15s/epoch, optim=AdamW, loss=0.5990, train-accuracy=0.7917, test-accuracy=0.6801]STEP update
+CIFAR
+Training Progress:  12%|█▏        | 23/200 [08:07<56:29, 19.15s/epoch, optim=AdamW, loss=0.5886, train-accuracy=0.7936, test-accuracy=0.7089]Training Progress:  12%|█▏        | 24/200 [08:07<56:11, 19.16s/epoch, optim=AdamW, loss=0.5886, train-accuracy=0.7936, test-accuracy=0.7089]STEP update
+CIFAR
+Training Progress:  12%|█▏        | 24/200 [08:25<56:11, 19.16s/epoch, optim=AdamW, loss=0.5633, train-accuracy=0.8048, test-accuracy=0.7220]Training Progress:  12%|█▎        | 25/200 [08:25<55:37, 19.07s/epoch, optim=AdamW, loss=0.5633, train-accuracy=0.8048, test-accuracy=0.7220]STEP update
+CIFAR
+Training Progress:  12%|█▎        | 25/200 [08:45<55:37, 19.07s/epoch, optim=AdamW, loss=0.5383, train-accuracy=0.8136, test-accuracy=0.7322]Training Progress:  13%|█▎        | 26/200 [08:45<55:24, 19.11s/epoch, optim=AdamW, loss=0.5383, train-accuracy=0.8136, test-accuracy=0.7322]STEP update
+CIFAR
+Training Progress:  13%|█▎        | 26/200 [09:04<55:24, 19.11s/epoch, optim=AdamW, loss=0.5251, train-accuracy=0.8172, test-accuracy=0.7361]Training Progress:  14%|█▎        | 27/200 [09:04<55:17, 19.18s/epoch, optim=AdamW, loss=0.5251, train-accuracy=0.8172, test-accuracy=0.7361]STEP update
+CIFAR
+Training Progress:  14%|█▎        | 27/200 [09:23<55:17, 19.18s/epoch, optim=AdamW, loss=0.5033, train-accuracy=0.8232, test-accuracy=0.7466]Training Progress:  14%|█▍        | 28/200 [09:23<55:02, 19.20s/epoch, optim=AdamW, loss=0.5033, train-accuracy=0.8232, test-accuracy=0.7466]STEP update
+CIFAR
+Training Progress:  14%|█▍        | 28/200 [09:43<55:02, 19.20s/epoch, optim=AdamW, loss=0.4907, train-accuracy=0.8271, test-accuracy=0.7356]Training Progress:  14%|█▍        | 29/200 [09:43<54:47, 19.23s/epoch, optim=AdamW, loss=0.4907, train-accuracy=0.8271, test-accuracy=0.7356]STEP update
+CIFAR
+Training Progress:  14%|█▍        | 29/200 [10:02<54:47, 19.23s/epoch, optim=AdamW, loss=0.4680, train-accuracy=0.8348, test-accuracy=0.7396]Training Progress:  15%|█▌        | 30/200 [10:02<54:20, 19.18s/epoch, optim=AdamW, loss=0.4680, train-accuracy=0.8348, test-accuracy=0.7396]STEP update
+CIFAR
+Training Progress:  15%|█▌        | 30/200 [10:21<54:20, 19.18s/epoch, optim=AdamW, loss=0.4531, train-accuracy=0.8400, test-accuracy=0.7592]Training Progress:  16%|█▌        | 31/200 [10:21<54:05, 19.21s/epoch, optim=AdamW, loss=0.4531, train-accuracy=0.8400, test-accuracy=0.7592]STEP update
+CIFAR
+Training Progress:  16%|█▌        | 31/200 [10:40<54:05, 19.21s/epoch, optim=AdamW, loss=0.4506, train-accuracy=0.8422, test-accuracy=0.7551]Training Progress:  16%|█▌        | 32/200 [10:40<53:50, 19.23s/epoch, optim=AdamW, loss=0.4506, train-accuracy=0.8422, test-accuracy=0.7551]STEP update
+CIFAR
+Training Progress:  16%|█▌        | 32/200 [10:59<53:50, 19.23s/epoch, optim=AdamW, loss=0.4272, train-accuracy=0.8513, test-accuracy=0.7516]Training Progress:  16%|█▋        | 33/200 [10:59<53:33, 19.24s/epoch, optim=AdamW, loss=0.4272, train-accuracy=0.8513, test-accuracy=0.7516]STEP update
+CIFAR
+Training Progress:  16%|█▋        | 33/200 [11:19<53:33, 19.24s/epoch, optim=AdamW, loss=0.4092, train-accuracy=0.8563, test-accuracy=0.7606]Training Progress:  17%|█▋        | 34/200 [11:19<53:28, 19.33s/epoch, optim=AdamW, loss=0.4092, train-accuracy=0.8563, test-accuracy=0.7606]STEP update
+CIFAR
+Training Progress:  17%|█▋        | 34/200 [11:38<53:28, 19.33s/epoch, optim=AdamW, loss=0.4023, train-accuracy=0.8594, test-accuracy=0.7615]Training Progress:  18%|█▊        | 35/200 [11:38<53:08, 19.32s/epoch, optim=AdamW, loss=0.4023, train-accuracy=0.8594, test-accuracy=0.7615]STEP update
+CIFAR
+Training Progress:  18%|█▊        | 35/200 [11:58<53:08, 19.32s/epoch, optim=AdamW, loss=0.3887, train-accuracy=0.8636, test-accuracy=0.7526]Training Progress:  18%|█▊        | 36/200 [11:58<52:55, 19.36s/epoch, optim=AdamW, loss=0.3887, train-accuracy=0.8636, test-accuracy=0.7526]STEP update
+CIFAR

@@ -13,11 +13,12 @@ class WrapperLR:
         if lr_scheduler != None:
             optimizer_name = optim.__class__.__name__
             if conf["lr_scheduler"]['type'] == "CosineAnnealingLR":
-                conf["lr_scheduler"]["params"]["eta_min"] = conf["optim"][optimizer_name]["params"]['lr'] / 10e3
+                conf["lr_scheduler"]["params"]["eta_min"] = conf["optim"][optimizer_name]["params"]['lr'] / 10e2
+                print(  conf["lr_scheduler"]["params"]["eta_min"])
             self.conf = conf
             self.lr_scheduler = lr_scheduler(optim,**conf["lr_scheduler"]["params"])  
     def stepEpoch(self):
-      
+        
         if self.lr_scheduler != None and self.conf["runs"]["lr_schedule_per_epoch"]:
             print("STEP update")
             self.lr_scheduler.step()

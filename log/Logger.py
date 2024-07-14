@@ -1,10 +1,12 @@
 import os
 import pickle
 from benchmark.benchmark import Benchmark,BenchmarkState
+from config.loader import getConfig
 from visualize.plot import Plotter
 import torch.distributed as dist
 import numpy as np
 import pickle
+import json
 
 def createNewRun(base_dir):
     if not os.path.isdir(base_dir):
@@ -50,6 +52,8 @@ class Logger:
                 os.makedirs(f"{ self.base_path}/{optim}")
                 with open(f"{self.base_path}/{optim}/benchmark.json", 'wb') as file:
                     pickle.dump(optim_data, file)
+                with open(f"{self.base_path}/conf.json", 'wb') as file:
+                    json.dump(getConfig(), file, indent=4)
                 
 
     """This is necessary if DDP is used. Due to the nature of AdaHessian, we have to use DP which makes this function

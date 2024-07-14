@@ -1,10 +1,11 @@
 runs:
-  epochs: 164
-  name: "cifar10-steplr"
+  epochs: 200
+  name: "cifar10-cosine"
   dir: "./runs"
+  lr_schedule_per_epoch: True
 dataset:
-  name: "cifar10-steplr"
-  path: "./data/cifar10"
+  name: "cifar10-cosine"
+  path: "./data/cifar10-cosine"
 kpi:
   - name: "tps"
     unit: "ms"
@@ -35,10 +36,9 @@ kpi:
     fqn: "GPU Memory usage"
     plot: "box"
 lr_scheduler:
-  type: "MultiStepLR"
+  type: "CosineAnnealingLR"
   params:
-    milestones: [80,120]
-    gamma: 0.1
+    T_max: 200
 optim:
   Apollo:
     name: "Apollo"
@@ -69,7 +69,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.001
+      weight_decay: 0.00025
   AdaHessian:
     name: "AdaHessian"
     params:
@@ -78,7 +78,7 @@ optim:
       beta2: 0.999
       eps: 0.01
       weight_decay: 0.001
-      init_lr: 0.0
+      init_lr: 0.001
       hessian_power: 1.0
       update_each: 1
       warmup: 500
@@ -88,8 +88,8 @@ optim:
       lr: 0.001
       beta1: 0.9
       beta2: 0.999
-      eps: 0.00000001
-      weight_decay: 0.001
+      eps: 0.0000000001
+      weight_decay: 0.00025
   AdamW:
     name: "Adam"
     params:
@@ -97,7 +97,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.001
+      weight_decay: 0.025
       weight_decouple: True
   RMSprop:
     name: "RMSprop"
@@ -105,10 +105,10 @@ optim:
       lr: 0.001
       alpha: 0.99
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.00025
   SGD:
     name: "SGD"
     params:
       lr: 0.1
       momentum: 0
-      weight_decay: 0.0005
+      weight_decay: 0.00025

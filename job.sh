@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=A40medium 
 #SBATCH --time=23:30:00
-#SBATCH --gpus=1
+#SBATCH --gpus=4
 #SBATCH --ntasks=1
 module load CUDA
 module load Python

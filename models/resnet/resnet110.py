@@ -5,7 +5,7 @@ import torch.nn.functional as F
 import math
 class ResNet110(nn.Module):
 
-    def __init__(self, depth=110, num_classes=1000, block_name='BasicBlock'):
+    def __init__(self, depth=110, num_classes=10, block_name='BasicBlock'):
         super(ResNet110, self).__init__()
         # Model type specifies number of layers for CIFAR-10 model
         if block_name.lower() == 'basicblock':

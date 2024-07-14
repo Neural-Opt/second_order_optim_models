@@ -97,7 +97,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.025
+      weight_decay: 0.00025
       weight_decouple: True
   RMSprop:
     name: "RMSprop"
