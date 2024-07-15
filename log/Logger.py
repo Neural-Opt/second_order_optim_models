@@ -52,7 +52,7 @@ class Logger:
                 os.makedirs(f"{ self.base_path}/{optim}")
                 with open(f"{self.base_path}/{optim}/benchmark.json", 'wb') as file:
                     pickle.dump(optim_data, file)
-                with open(f"{self.base_path}/conf.json", 'wb') as file:
+                with open(f"{self.base_path}/conf.json", 'w') as file:
                     json.dump(getConfig(), file, indent=4)
                 
 

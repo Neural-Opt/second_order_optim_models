@@ -1,4 +1,5 @@
 data/
+results/
 #runs/
 # Ignore Python compiled files
 __pycache__/

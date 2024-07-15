@@ -5,9 +5,11 @@ from config.loader import getConfig
 from models.benchmarkset import BenchmarkSet
 from torch.utils.data import DataLoader
 from datasets import load_dataset
-from transformers import MarianTokenizer,MarianMTModel, MarianConfig
+from transformers import MarianTokenizer,MarianMTModel, MarianConfig, get_linear_schedule_with_warmup
+
 from sacrebleu import corpus_bleu
 import numpy as np
+import evaluate
 from utils.utils import MeanAggregator
 from tqdm import tqdm
 
@@ -15,11 +17,11 @@ class WMT14(BenchmarkSet):
     def __init__(self,batch_size=256) -> None:
         super().__init__()
         self.conf = getConfig()
-      # Load the WMT14 English-German dataset
-        self.dataset = load_dataset("wmt14", "de-en")
+        self.metric = evaluate.load("sacrebleu")
 
+        self.dataset = load_dataset("wmt14", "de-en")
         self.tokenizer =  MarianTokenizer.from_pretrained('Helsinki-NLP/opus-mt-en-de')
-        print(f"Vocab size {self.tokenizer.vocab_size}")
+       
         self.batch_size = batch_size
         self.setup()
 
@@ -37,19 +39,25 @@ class WMT14(BenchmarkSet):
         inputs = [ex['en'] for ex in data['translation']]
         targets = [ex['de'] for ex in data['translation']]
         return self.tokenizer(inputs, text_target=targets, max_length=128, truncation=True, padding='max_length')
-    def setup(self):
+    def setup(self,optim):
 
        # print(len(self.dataset['train']))
         self.dataset['train'] =  self.dataset['train'].select(range(50000))
         self.dataset['test'] =  self.dataset['test'].select(range(5))
 
+        self.lr_scheduler = get_linear_schedule_with_warmup(
+                    optim,
+                    num_warmup_steps=len(self.dataset['train']) * 0.1,  # 10% of total steps
+                    num_training_steps=len(self.dataset['train'])
+        )
         self.tokenized_datasets = self.dataset.map(self.preprocess, batched=True,load_from_cache_file=False)
         self.tokenized_datasets.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
+   
     def getDataLoader(self):
         train_set = DataLoader(self.tokenized_datasets['train'], batch_size=self.batch_size, shuffle=True)
         test_set = DataLoader(self.tokenized_datasets['test'], batch_size=self.batch_size, shuffle=False)
         val_set = DataLoader(self.tokenized_datasets['validation'], batch_size=self.batch_size, shuffle=False)
-        return (train_set,test_set,val_set)
+        return (train_set,test_set,len(train_set))
 
     def getAssociatedModel(self,rank):
         config = MarianConfig(
@@ -74,7 +82,7 @@ class WMT14(BenchmarkSet):
         loss_fct = torch.nn.CrossEntropyLoss(ignore_index=self.tokenizer.pad_token_id)
         loss = loss_fct(logits, labels)
         return loss
-    def train(self, model, device, train_loader, optimizer, criterion, create_graph):
+    def train(self, model, device, train_loader, optimizer, criterion, create_graph,lr_scheduler):
        
         benchmark = Benchmark.getInstance(None)
 
@@ -88,17 +96,18 @@ class WMT14(BenchmarkSet):
             benchmark.stepStart()
             optimizer.zero_grad()
             batch = {k: v.to(device) for k, v in batch.items()}
+            labels = torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
 
             outputs = model(
               input_ids=batch["input_ids"],
               attention_mask=batch["attention_mask"],
-              labels =torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
+              labels=labels
               )
          
             loss =outputs.loss #self.loss_function(outputs.logits,batch['labels'])
            
             loss.backward(create_graph=create_graph)
-            optimizer.step()
+            self.lr_scheduler.step()
             preds = torch.argmax(outputs.logits, dim=-1)
          
             mask = batch['labels'] != self.tokenizer.pad_token_id
@@ -140,19 +149,18 @@ class WMT14(BenchmarkSet):
         #print(f"BLEU: {corpus_bleu([decoded_predictions[4]],[decoded_references[4]])}")
 
         sacre_bleu = corpus_bleu(decoded_predictions, decoded_references,use_effective_order=True)
-       
+        result = self.metric.compute(predictions=decoded_predictions, references=decoded_references)
+
         #print(f"Bleu: {sacre_bleu.score} ")
 
         for i in range(5):
-        #  self.translate(model,device,"I am going to buy a car!")
-
             print(f"\nREF: {decoded_references[i][0]}")
             print(f"PRED: {decoded_predictions[i]}")
             print(f"BLEU: {corpus_bleu([decoded_predictions[i]],[decoded_references[i]],use_effective_order=True).score}")
 
-        benchmark.add("bleu",sacre_bleu.score)
+        benchmark.add("bleu",result.score)
 
-        return sacre_bleu.score
+        return result.score
     def translate(self, model,device, sentence: str) -> str:
         
         model.eval()  # Set the model to evaluation mode

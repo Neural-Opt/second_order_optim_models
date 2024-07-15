@@ -62,9 +62,9 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
     logger = Logger(base_path=base_path,rank=device,world_size=world_size)
    
     dataset = getBenchmarkSet()
-    train_loader ,test_loader , val_loader = dataset.getDataLoader()
+    train_loader ,test_loader , len_train = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["AdaHessian","AdaBelief","Adam","Apollo","ApolloW","RMSprop","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
+    names,optimizers,params = getOptim([])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
       
@@ -72,6 +72,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
         model  = dataset.getAssociatedModel(device)
         model.train()
         optim = optim_class(model.parameters(),**params[name])
+       # dataset.setup(optim)
 
 # Adam optimizer parameters
        # optim = torch.optim.AdamW(model.parameters(), lr=5e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01)
