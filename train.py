@@ -62,7 +62,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
     logger = Logger(base_path=base_path,rank=device,world_size=world_size)
    
     dataset = getBenchmarkSet()
-    train_loader ,test_loader , len_train = dataset.getDataLoader()
+    train_loader ,test_loader , test_loader = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
     names,optimizers,params = getOptim([])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
 

@@ -64,10 +64,10 @@
             "name": "Apollo",
             "params": {
                 "init_lr": "None",
-                "lr": 0.01,
+                "lr": 0.001,
                 "eps": 0.0001,
                 "beta": 0.9,
-                "warmup": 500,
+                "warmup": 0,
                 "weight_decay_type": "L2",
                 "weight_decay": 0.0025,
                 "rebound": "constant"
@@ -77,10 +77,10 @@
             "name": "Apollo",
             "params": {
                 "init_lr": "None",
-                "lr": 0.01,
+                "lr": 0.001,
                 "eps": 0.0001,
                 "beta": 0.9,
-                "warmup": 500,
+                "warmup": 0,
                 "weight_decay_type": "decoupled",
                 "weight_decay": 0.0025,
                 "rebound": "constant"
@@ -145,7 +145,7 @@
             "name": "SGD",
             "params": {
                 "lr": 0.1,
-                "momentum": 0,
+                "momentum": 0.9,
                 "weight_decay": 0.0025
             }
         }

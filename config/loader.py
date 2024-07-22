@@ -23,11 +23,9 @@ class WrapperLR:
     def stepEpoch(self):
         
         if self.lr_scheduler != None and self.conf["runs"]["lr_schedule_per_epoch"]:
-            print("STEP epoch")
             self.lr_scheduler.step()
     def stepUpdate(self):
         if self.lr_scheduler != None and not self.conf["runs"]["lr_schedule_per_epoch"]:
-            print("STEP update")
             self.lr_scheduler.step()
 
 def getConfig(yaml_file_path="config.yaml"):

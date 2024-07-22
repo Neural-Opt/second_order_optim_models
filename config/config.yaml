@@ -47,9 +47,9 @@ optim:
       lr: 0.01
       eps: 0.0001
       beta: 0.9
-      warmup: 500
+      warmup: 0
       weight_decay_type: "L2"
-      weight_decay:  0.0025
+      weight_decay:  0.00025
       rebound: "constant"
   ApolloW:
     name: "Apollo"
@@ -58,9 +58,9 @@ optim:
       lr: 0.01
       eps: 0.0001
       beta: 0.9
-      warmup: 500
+      warmup: 0
       weight_decay_type: "decoupled"
-      weight_decay: 0.0025
+      weight_decay: 0.025
       rebound: "constant"
   AdaHessian:
     name: "AdaHessian"
@@ -69,11 +69,11 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.01
-      weight_decay: 0.0025
+      weight_decay: 0.001
       init_lr: 0.001
       hessian_power: 1.0
       update_each: 1
-      warmup: 500
+      warmup: 0
   Adam:
     name: "Adam"
     params:
@@ -98,7 +98,7 @@ optim:
       lr: 0.001
       beta1: 0.9
       beta2: 0.999
-      eps: 0.0000000001
+      eps: 0.00000001
       weight_decay: 0.0025
       weight_decouple: True
 
@@ -112,6 +112,9 @@ optim:
   SGD:
     name: "SGD"
     params:
-      lr: 0.1
-      momentum: 0
+      lr: 0.001
+      momentum: 0.9
       weight_decay: 0.0025
+
+
+#this will train the optims with all their optimal values

@@ -49,7 +49,7 @@ a == [[q],[b]]
 class BenchmarkAnalyzer:
     @staticmethod
     def getRunCount(dir):
-        return sum(os.path.isdir(os.path.join(f"./runs/{dir}", d)) for d in os.listdir(f"./runs/{dir}")) 
+        return 1#sum(os.path.isdir(os.path.join(f"./runs/{dir}", d)) for d in os.listdir(f"./runs/{dir}")) 
     @staticmethod
     def getAllData(dir,dirCount,optim,join=False):
         state_collector = BenchmarkState(f"./runs/{dir}/{dirCount}/{optim}/benchmark.json").dump()
@@ -65,10 +65,16 @@ class BenchmarkAnalyzer:
                     state_collector[key].append(state[key])
         return {key: np.array(state_collector[key]) for key in state_collector}
     staticmethod
-    def getConcatStates(setName,optim,reducer=lambda x:x):
-        concat = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim)
+    def getConcatStates(setName,optim,run=-1,reducer=lambda x:x):
+      
+        if run==-1:
+            concat = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim)
+        else:
+            concat = BenchmarkState(f"./runs/{setName}/{run}/{optim}/benchmark.json")
+            concat = {key : np.array(concat[key]) for key in concat.dump().keys()}
         for key in concat.keys():
             concat[key] =  reducer(concat[key])
+       
         return concat
     
     @staticmethod
@@ -81,8 +87,7 @@ class BenchmarkAnalyzer:
     def mean(setName,optim,join=False,reducer=lambda x:x):
         joined = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim,join=join)
         for key in joined.keys():
-            print(key)
-            print(joined[key].shape,np.mean(reducer(joined[key]),axis=1 ))
+  
             joined[key] =  np.mean(reducer(joined[key]),axis=1 )
         return joined
     @staticmethod

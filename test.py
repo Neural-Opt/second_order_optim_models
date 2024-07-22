@@ -10,6 +10,7 @@ class Plotter():
     def __init__(self, optimizers, data) -> None:
         self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 12))
         self.data = data
+      
         self.optimizers = optimizers
 
     def plot(self, metric, title, subplot_idx):
@@ -25,6 +26,7 @@ class Plotter():
 
         elif kpi['plot'] == 'box':
             box_data = [self.data[optim][metric] for optim in self.optimizers]
+            box_data = np.log(box_data).tolist()
             ax.boxplot(box_data, patch_artist=False, notch=False, vert=True, labels=self.optimizers)
         elif kpi['plot'] == 'bar':
             for optim in self.optimizers:
@@ -34,18 +36,18 @@ class Plotter():
 
         ax.set_title(title)
 
-run = 5
-optim = ["Adam","AdamW","RMSprop","SGD","AdaBelief"]
-l = Logger(rank="cuda", world_size=1, base_path=f"./runs/cifar10-steplr/{run}")
+run = 1
+optim = ["Adam","AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
+l = Logger(rank="cuda", world_size=1, base_path=f"./runs/cifar10-step-lr/{run}")
 data = l.getData()
 print(data.keys(),)
-"""[PostProcessor(data[opt]) for opt in optim]
+[PostProcessor(data[opt]) for opt in optim]
 
 p = Plotter(optim, data)
-metrics = metrics =  ["gpu_mem", "tps"]#["acc_train", "acc_test", "train_loss", "test_loss",] #["gpu_mem", "tps"] #
+metrics = metrics = ["acc_train", "acc_test", "train_loss", "test_loss",]#["acc_train", "acc_test", "train_loss", "test_loss",] #["gpu_mem", "tps"] #
 #metrics = ["gpu_mem", "tps"]
 
-titles =["GPU Memory (MiB) (milestone)", "Time per step (TPS) (milestone)"]
+titles =["Training Accuracy (milestone)", "Test Accuracy (milestone)", "Train Loss (milestone)","Test Loss (milestone)"]
 #["Training Accuracy (milestone)", "Test Accuracy (milestone)", "Train Loss (milestone)","Test Loss (milestone)"]# ["GPU Memory (MiB) (milestone)", "Time per step (TPS) (milestone)"]#
 #titles = ["GPU Memory (MiB) (milestone)", "Time per step (TPS) (milestone)"]
 
@@ -66,6 +68,5 @@ print(legend_entries.keys())
 fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=2)
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
-plt.savefig('result_plot_.png')
+plt.savefig('result_plot_cifar10-step-lr.png')
 plt.show()
-"""

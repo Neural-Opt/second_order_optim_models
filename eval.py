@@ -4,10 +4,10 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
 
-optimizers = [ 'Adam','AdamW','AdaBelief',"RMSprop"]
+optimizers = [ 'Adam','AdamW','AdaBelief',"RMSprop","SGD","Apollo","ApolloW","AdaHessian"]
 
 def eval_kpis_mean():
-    runs_to_include = ['cifar10-steplr']
+    runs_to_include = ['tinyimagenet-cosine']
     cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
     cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
     rows = []
@@ -24,10 +24,8 @@ def eval_kpis_mean():
         for set in runs_to_include:
             sgd_state = BenchmarkAnalyzer.getConcatStates(set,"SGD")
             state = BenchmarkAnalyzer.getConcatStates(set,optim)
-
             speed_arr = (state['tps'] / sgd_state['tps']).reshape(1,-1)
             gpu_mem_arr = (state['gpu_mem'] / sgd_state['gpu_mem']).reshape(1,-1)
-            print(gpu_mem_arr.shape)
 
             speed_x, speed_x_std = np.mean(speed_arr), np.std(speed_arr)
             mem_x, mem_x_std =np.mean(gpu_mem_arr), np.std(gpu_mem_arr)
@@ -38,7 +36,7 @@ def eval_kpis_mean():
         rows.append(row)
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_kpis():
-    runs_to_include = ['cifar10-steplr']
+    runs_to_include = ['tinyimagenet-cosine']
     cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
     cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
     rows = []
@@ -78,15 +76,16 @@ def eval_acc_mean():
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_acc():
-    runs_to_include = ['cifar10-steplr']
+    runs_to_include = ['tinyimagenet-cosine']
     cols = [" "]+[f"{k} - Accuracy"for k in runs_to_include]
     rows = []
-    run = 2
+    run = 1
     for optim in optimizers:
         row = [optim]
         for set in runs_to_include:
-            state = BenchmarkAnalyzer.getConcatStates(set,optim,reducer=lambda x: x[:,x.shape[1] - 1:])
-            state['acc_test']  = state['acc_test'][run]
+            state = BenchmarkAnalyzer.getConcatStates(set,optim,run=run,reducer=lambda x: x[x.shape[0] - 1:])
+            print(state)
+            state['acc_test']  = state['acc_test']
             accs = (state['acc_test']).reshape(1,-1)
             acc_mean, acc_sgd = np.mean(accs), np.std(accs)
 
@@ -95,7 +94,7 @@ def eval_acc():
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_convergence():
-    runs_to_include = ['cifar10-steplr']
+    runs_to_include = ['tinyimagenet-cosine']
     cols = [" "]+[f"{k} - TTC"for k in runs_to_include]
     rows = []
     for optim in optimizers:
@@ -110,5 +109,5 @@ def eval_convergence():
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_acc()
+eval_kpis_mean()
 #print(eval_kpis())
