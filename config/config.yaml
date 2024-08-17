@@ -1,11 +1,11 @@
 runs:
-  epochs: 200
-  name: "cifar10-cosine"
+  epochs: 120
+  name: "tinyimagenet-cosine"
   dir: "./runs"
   lr_schedule_per_epoch: True
 dataset:
-  name: "cifar10-cosine"
-  path: "./data/cifar10-cosine"
+  name: "tinyimagenet"
+  path: "./data/tinyimagenet"
 kpi:
   - name: "tps"
     unit: "ms"
@@ -38,38 +38,38 @@ kpi:
 lr_scheduler:
   type: "CosineAnnealingLR"
   params:
-    T_max: 200
+    T_max: 120
 optim:
   Apollo:
     name: "Apollo"
     params:
       init_lr: "None"
-      lr: 0.01
+      lr: 0.001
       eps: 0.0001
       beta: 0.9
       warmup: 0
       weight_decay_type: "L2"
-      weight_decay:  0.00025
+      weight_decay:  0.0001
       rebound: "constant"
   ApolloW:
     name: "Apollo"
     params:
       init_lr: "None"
-      lr: 0.01
+      lr: 0.001
       eps: 0.0001
       beta: 0.9
       warmup: 0
       weight_decay_type: "decoupled"
-      weight_decay: 0.025
+      weight_decay: 0.0001
       rebound: "constant"
   AdaHessian:
     name: "AdaHessian"
     params:
-      lr: 0.15
+      lr: 0.001
       beta1: 0.9
       beta2: 0.999
       eps: 0.01
-      weight_decay: 0.001
+      weight_decay: 0.0001
       init_lr: 0.001
       hessian_power: 1.0
       update_each: 1
@@ -81,7 +81,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.0025
+      weight_decay: 0.0001
   AdamW:
     name: "Adam"
     params:
@@ -89,7 +89,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.0025
+      weight_decay: 0.0001
       weight_decouple: True
 
   AdaBelief:
@@ -99,7 +99,7 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.0025
+      weight_decay: 0.0001
       weight_decouple: True
 
   RMSprop:
@@ -108,13 +108,13 @@ optim:
       lr: 0.001
       alpha: 0.99
       eps: 0.00000001
-      weight_decay: 0.0025
+      weight_decay: 0.0001
   SGD:
     name: "SGD"
     params:
       lr: 0.001
       momentum: 0.9
-      weight_decay: 0.0025
+      weight_decay: 0.0001
 
 
 #this will train the optims with all their optimal values

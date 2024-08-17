@@ -1,12 +1,13 @@
 {
     "runs": {
-        "epochs": 164,
-        "name": "cifar10-steplr",
-        "dir": "./runs"
+        "epochs": 200,
+        "name": "cifar10-cosine",
+        "dir": "./runs",
+        "lr_schedule_per_epoch": true
     },
     "dataset": {
-        "name": "cifar10-steplr",
-        "path": "./data/cifar10"
+        "name": "cifar10-cosine",
+        "path": "./data/cifar10-cosine"
     },
     "kpi": [
         {
@@ -53,13 +54,9 @@
         }
     ],
     "lr_scheduler": {
-        "type": "MultiStepLR",
+        "type": "CosineAnnealingLR",
         "params": {
-            "milestones": [
-                80,
-                120
-            ],
-            "gamma": 0.1
+            "T_max": 200
         }
     },
     "optim": {
@@ -70,7 +67,7 @@
                 "lr": 0.01,
                 "eps": 0.0001,
                 "beta": 0.9,
-                "warmup": 500,
+                "warmup": 0,
                 "weight_decay_type": "L2",
                 "weight_decay": 0.00025,
                 "rebound": "constant"
@@ -83,20 +80,10 @@
                 "lr": 0.01,
                 "eps": 0.0001,
                 "beta": 0.9,
-                "warmup": 500,
+                "warmup": 0,
                 "weight_decay_type": "decoupled",
                 "weight_decay": 0.025,
                 "rebound": "constant"
-            }
-        },
-        "Adam": {
-            "name": "Adam",
-            "params": {
-                "lr": 0.001,
-                "beta1": 0.9,
-                "beta2": 0.999,
-                "eps": 1e-08,
-                "weight_decay": 0.00025
             }
         },
         "AdaHessian": {
@@ -110,17 +97,17 @@
                 "init_lr": 0.001,
                 "hessian_power": 1.0,
                 "update_each": 1,
-                "warmup": 500
+                "warmup": 0
             }
         },
-        "AdaBelief": {
-            "name": "AdaBelief",
+        "Adam": {
+            "name": "Adam",
             "params": {
                 "lr": 0.001,
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0.00025
+                "weight_decay": 0.0025
             }
         },
         "AdamW": {
@@ -130,7 +117,18 @@
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0.00025,
+                "weight_decay": 0.0025,
+                "weight_decouple": true
+            }
+        },
+        "AdaBelief": {
+            "name": "AdaBelief",
+            "params": {
+                "lr": 0.001,
+                "beta1": 0.9,
+                "beta2": 0.999,
+                "eps": 1e-08,
+                "weight_decay": 0.0025,
                 "weight_decouple": true
             }
         },
@@ -140,15 +138,15 @@
                 "lr": 0.001,
                 "alpha": 0.99,
                 "eps": 1e-08,
-                "weight_decay": 0.00025
+                "weight_decay": 0.0025
             }
         },
         "SGD": {
             "name": "SGD",
             "params": {
-                "lr": 0.1,
-                "momentum": 0,
-                "weight_decay": 0.00025
+                "lr": 0.001,
+                "momentum": 0.9,
+                "weight_decay": 0.0025
             }
         }
     }

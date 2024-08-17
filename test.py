@@ -38,7 +38,8 @@ class Plotter():
 
 run = 1
 optim = ["Adam","AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
-l = Logger(rank="cuda", world_size=1, base_path=f"./runs/cifar10-step-lr/{run}")
+path = "./results/tinyimagenet-step-lr/second-order-best"
+l = Logger(rank="cuda", world_size=1, base_path=path)
 data = l.getData()
 print(data.keys(),)
 [PostProcessor(data[opt]) for opt in optim]
@@ -68,5 +69,5 @@ print(legend_entries.keys())
 fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=2)
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
-plt.savefig('result_plot_cifar10-step-lr.png')
+plt.savefig('result_plot_tinyimagent-step-lr-second-order-best.png')
 plt.show()

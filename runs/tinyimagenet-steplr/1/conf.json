@@ -1,12 +1,13 @@
 {
     "runs": {
-        "epochs": 164,
-        "name": "cifar10-steplr",
-        "dir": "./runs"
+        "epochs": 120,
+        "name": "tinyimagenet-steplr",
+        "dir": "./runs",
+        "lr_schedule_per_epoch": true
     },
     "dataset": {
-        "name": "cifar10-steplr",
-        "path": "./data/cifar10"
+        "name": "tinyimagenet",
+        "path": "./data/tinyimagenet"
     },
     "kpi": [
         {
@@ -56,8 +57,8 @@
         "type": "MultiStepLR",
         "params": {
             "milestones": [
-                80,
-                120
+                40,
+                80
             ],
             "gamma": 0.1
         }
@@ -72,7 +73,7 @@
                 "beta": 0.9,
                 "warmup": 500,
                 "weight_decay_type": "L2",
-                "weight_decay": 0.00025,
+                "weight_decay": 0.0001,
                 "rebound": "constant"
             }
         },
@@ -85,18 +86,8 @@
                 "beta": 0.9,
                 "warmup": 500,
                 "weight_decay_type": "decoupled",
-                "weight_decay": 0.025,
+                "weight_decay": 0.01,
                 "rebound": "constant"
-            }
-        },
-        "Adam": {
-            "name": "Adam",
-            "params": {
-                "lr": 0.001,
-                "beta1": 0.9,
-                "beta2": 0.999,
-                "eps": 1e-08,
-                "weight_decay": 0.00025
             }
         },
         "AdaHessian": {
@@ -113,14 +104,14 @@
                 "warmup": 500
             }
         },
-        "AdaBelief": {
-            "name": "AdaBelief",
+        "Adam": {
+            "name": "Adam",
             "params": {
                 "lr": 0.001,
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0.00025
+                "weight_decay": 0.0001
             }
         },
         "AdamW": {
@@ -130,7 +121,18 @@
                 "beta1": 0.9,
                 "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0.00025,
+                "weight_decay": 0.0001,
+                "weight_decouple": true
+            }
+        },
+        "AdaBelief": {
+            "name": "AdaBelief",
+            "params": {
+                "lr": 0.001,
+                "beta1": 0.9,
+                "beta2": 0.999,
+                "eps": 1e-08,
+                "weight_decay": 0.0001,
                 "weight_decouple": true
             }
         },
@@ -140,15 +142,15 @@
                 "lr": 0.001,
                 "alpha": 0.99,
                 "eps": 1e-08,
-                "weight_decay": 0.00025
+                "weight_decay": 0.0001
             }
         },
         "SGD": {
             "name": "SGD",
             "params": {
-                "lr": 0.1,
-                "momentum": 0,
-                "weight_decay": 0.00025
+                "lr": 0.001,
+                "momentum": 0.9,
+                "weight_decay": 0.0001
             }
         }
     }
