@@ -17,6 +17,8 @@ class WrapperLR:
             self.conf = conf
             self.lr_scheduler = lr_scheduler(optim,**conf["lr_scheduler"]["params"])  
             self.optimizer = optim
+        else:
+            self.lr_scheduler = None
 
     def get_lr(self,):
         return self.lr_scheduler.get_lr()

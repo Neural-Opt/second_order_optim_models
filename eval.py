@@ -94,12 +94,12 @@ def eval_acc():
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_convergence():
-    runs_to_include = ['cifar10-step-lr']
+    runs_to_include = ['tinyimagenet-cosine']
     cols = [" "]+[f"{k} - TTC"for k in runs_to_include]
     rows = []
     for optim in optimizers:
         row = [optim]
-        run=5
+        run="second-order-best"
         for set in runs_to_include:
             state = BenchmarkAnalyzer.getConcatStates(set,optim,run=run)
             ttcs = (state['ttc']).reshape(1,-1)
@@ -110,5 +110,5 @@ def eval_convergence():
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_acc()
+eval_convergence()
 #print(eval_kpis())

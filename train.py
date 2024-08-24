@@ -1,7 +1,7 @@
 import os
 from benchmark.benchmark import Benchmark
 from benchmark.state import BenchmarkState
-from config.loader import getConfig, getOptim,getLRScheduler
+from config.loader import getConfig, getOptim, getLRScheduler 
 from models.demux import getBenchmarkSet
 import torch
 import random
@@ -62,22 +62,25 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
     logger = Logger(base_path=base_path,rank=device,world_size=world_size)
    
     dataset = getBenchmarkSet()
-    train_loader ,test_loader , test_loader = dataset.getDataLoader()
+    train_loader ,test_loader,len_train = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim([])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
+    names,optimizers,params = getOptim(["AdaBelief","AdaHessian","AdamW","Apollo","ApolloW","RMSprop","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
       
         set_seed(seed)
+      
         model  = dataset.getAssociatedModel(device)
-        model.train()
+       
         optim = optim_class(model.parameters(),**params[name])
+      #  dataset.setup(optim)
        # dataset.setup(optim)
 
 # Adam optimizer parameters
        # optim = torch.optim.AdamW(model.parameters(), lr=5e-4, betas=(0.9, 0.999), eps=1e-8, weight_decay=0.01)
 
 # Learning rate scheduler
+      #  dataset.init(optim)
         logger.setup(optim=name)
         lr_scheduler = getLRScheduler(optim)
         if device == 0 or device == "cuda":
@@ -89,7 +92,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
             #TODO replace train_set
             test_acc = dataset.test(model, device, test_loader, criterion)
             if device == 0 or device == "cuda":
-                lr = lr_scheduler.optimizer.param_groups[0]['lr']
+                lr = dataset.lr_scheduler.optimizer.param_groups[0]['lr']
 
                 epoch_bar.set_postfix({'optim': f'{name}',
                                   'lr':f'{lr}',
@@ -98,7 +101,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
                                   'test-accuracy': f'{test_acc:.4f}'})
                                   
                 epoch_bar.update(1)
-            lr_scheduler.stepEpoch()
+           # lr_scheduler.stepEpoch()
             
         if device == 0 or device == "cuda":
             epoch_bar.close()

@@ -1,10 +1,11 @@
 runs:
-  epochs: 164
-  name: "cifar10-steplr"
+  epochs: 120
+  name: "tinyimagenet-cosine"
   dir: "./runs"
+  lr_schedule_per_epoch: True
 dataset:
-  name: "cifar10-steplr"
-  path: "./data/cifar10"
+  name: "tinyimagenet"
+  path: "./data/tinyimagenet"
 kpi:
   - name: "tps"
     unit: "ms"
@@ -35,10 +36,9 @@ kpi:
     fqn: "GPU Memory usage"
     plot: "box"
 lr_scheduler:
-  type: "MultiStepLR"
+  type: "CosineAnnealingLR"
   params:
-    milestones: [80,120]
-    gamma: 0.1
+    T_max: 120
 optim:
   Apollo:
     name: "Apollo"
@@ -49,7 +49,7 @@ optim:
       beta: 0.9
       warmup: 500
       weight_decay_type: "L2"
-      weight_decay:  0.00025
+      weight_decay:  0.0001
       rebound: "constant"
   ApolloW:
     name: "Apollo"
@@ -60,16 +60,8 @@ optim:
       beta: 0.9
       warmup: 500
       weight_decay_type: "decoupled"
-      weight_decay: 0.025
+      weight_decay: 0.01
       rebound: "constant"
-  Adam:
-    name: "Adam"
-    params:
-      lr: 0.001
-      beta1: 0.9
-      beta2: 0.999
-      eps: 0.00000001
-      weight_decay: 0.001
   AdaHessian:
     name: "AdaHessian"
     params:
@@ -78,18 +70,18 @@ optim:
       beta2: 0.999
       eps: 0.01
       weight_decay: 0.001
-      init_lr: 0.0
+      init_lr: 0.001
       hessian_power: 1.0
       update_each: 1
       warmup: 500
-  AdaBelief:
-    name: "AdaBelief"
+  Adam:
+    name: "Adam"
     params:
       lr: 0.001
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.001
+      weight_decay: 0.0001
   AdamW:
     name: "Adam"
     params:
@@ -97,18 +89,32 @@ optim:
       beta1: 0.9
       beta2: 0.999
       eps: 0.00000001
-      weight_decay: 0.001
+      weight_decay: 0.0001
       weight_decouple: True
+
+  AdaBelief:
+    name: "AdaBelief"
+    params:
+      lr: 0.001
+      beta1: 0.9
+      beta2: 0.999
+      eps: 0.00000001
+      weight_decay: 0.0001
+      weight_decouple: True
+
   RMSprop:
     name: "RMSprop"
     params:
       lr: 0.001
       alpha: 0.99
       eps: 0.00000001
-      weight_decay: 0
+      weight_decay: 0.0001
   SGD:
     name: "SGD"
     params:
       lr: 0.1
-      momentum: 0
-      weight_decay: 0.0005
+      momentum: 0.9
+      weight_decay: 0.0001
+
+
+#this will train the optims with all their optimal values

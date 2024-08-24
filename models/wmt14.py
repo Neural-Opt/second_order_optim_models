@@ -6,15 +6,34 @@ from models.benchmarkset import BenchmarkSet
 from torch.utils.data import DataLoader
 from datasets import load_dataset
 from transformers import MarianTokenizer,MarianMTModel, MarianConfig, get_linear_schedule_with_warmup
-
-from sacrebleu import corpus_bleu
-import numpy as np
+from torch.cuda.amp import autocast, GradScaler
+import math
 import evaluate
 from utils.utils import MeanAggregator
-from tqdm import tqdm
+
+class InverseSquareRootLR(torch.optim.lr_scheduler._LRScheduler):
+    def __init__(self, optimizer, warmup_steps, init_lr, min_lr=1e-9, last_epoch=-1):
+        self.warmup_steps = warmup_steps
+        self.init_lr = init_lr
+        self.min_lr = min_lr
+        super(InverseSquareRootLR, self).__init__(optimizer, last_epoch)
+
+    def get_lr(self):
+        step = self.last_epoch + 1
+        if step < self.warmup_steps:
+            # Linear warmup
+            lr = self.init_lr * (step / self.warmup_steps)
+        else:
+            # Inverse square root decay
+            lr = self.init_lr * math.sqrt(self.warmup_steps / step)
+
+        # Ensure learning rate doesn't go below minimum
+        lr = max(lr, self.min_lr)
+
+        return [lr for _ in self.base_lrs]
 
 class WMT14(BenchmarkSet):
-    def __init__(self,batch_size=256) -> None:
+    def __init__(self,batch_size=256,epochs = 164) -> None:
         super().__init__()
         self.conf = getConfig()
         self.metric = evaluate.load("sacrebleu")
@@ -23,8 +42,11 @@ class WMT14(BenchmarkSet):
         self.tokenizer =  MarianTokenizer.from_pretrained('Helsinki-NLP/opus-mt-en-de')
        
         self.batch_size = batch_size
-        self.setup()
+        self.lr_scheduler =None
+        self.scaler = GradScaler()
 
+
+        self.setup()
     def log(self):
         pass
     def decode_tensor(self,tensor):
@@ -39,17 +61,22 @@ class WMT14(BenchmarkSet):
         inputs = [ex['en'] for ex in data['translation']]
         targets = [ex['de'] for ex in data['translation']]
         return self.tokenizer(inputs, text_target=targets, max_length=128, truncation=True, padding='max_length')
-    def setup(self,optim):
+    def getLRScheduler(self,optim):
+        if self.lr_scheduler == None:
+            self.lr_scheduler =  InverseSquareRootLR(
+                                        optim,
+                                        warmup_steps=4000,
+                                        min_lr=1e-9,
+                                        init_lr=optim.param_groups[0]['lr']
+)
+        return self.lr_scheduler
+    def setup(self):
 
        # print(len(self.dataset['train']))
-        self.dataset['train'] =  self.dataset['train'].select(range(50000))
-        self.dataset['test'] =  self.dataset['test'].select(range(5))
+        self.dataset['train'] =  self.dataset['train']#.select(range(200000))
+        self.dataset['test'] =  self.dataset['test']#.select(range(1000))
 
-        self.lr_scheduler = get_linear_schedule_with_warmup(
-                    optim,
-                    num_warmup_steps=len(self.dataset['train']) * 0.1,  # 10% of total steps
-                    num_training_steps=len(self.dataset['train'])
-        )
+       
         self.tokenized_datasets = self.dataset.map(self.preprocess, batched=True,load_from_cache_file=False)
         self.tokenized_datasets.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
    
@@ -62,11 +89,11 @@ class WMT14(BenchmarkSet):
     def getAssociatedModel(self,rank):
         config = MarianConfig(
            vocab_size=self.tokenizer.vocab_size,
-            encoder_layers=3,
-            encoder_ffn_dim=512,
+            encoder_layers=6,
+            encoder_ffn_dim=2048,
             encoder_attention_heads=8,
-            decoder_layers=3,
-            decoder_ffn_dim=512,
+            decoder_layers=6,
+            decoder_ffn_dim=2048,
             decoder_attention_heads=8,
             d_model=512,     
     )
@@ -83,7 +110,8 @@ class WMT14(BenchmarkSet):
         loss = loss_fct(logits, labels)
         return loss
     def train(self, model, device, train_loader, optimizer, criterion, create_graph,lr_scheduler):
-       
+        model.train()
+        lr_scheduler = self.getLRScheduler(optimizer)
         benchmark = Benchmark.getInstance(None)
 
 
@@ -98,16 +126,23 @@ class WMT14(BenchmarkSet):
             batch = {k: v.to(device) for k, v in batch.items()}
             labels = torch.where(batch['labels'] == self.tokenizer.pad_token_id, torch.tensor(-100), batch['labels'])
 
-            outputs = model(
-              input_ids=batch["input_ids"],
-              attention_mask=batch["attention_mask"],
-              labels=labels
-              )
-         
-            loss =outputs.loss #self.loss_function(outputs.logits,batch['labels'])
-           
-            loss.backward(create_graph=create_graph)
-            self.lr_scheduler.step()
+            with autocast():
+                outputs = model(
+                input_ids=batch["input_ids"],
+                attention_mask=batch["attention_mask"],
+                labels=labels
+                )
+                loss = outputs.loss.mean()
+
+      #self.loss_function(outputs.logits,batch['labels'])
+            self.scaler.scale(loss).backward(create_graph=create_graph)
+            self.scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.module.parameters(), max_norm=1.0)
+            self.scaler.step(optimizer)
+
+            # Update scaler
+            self.scaler.update()
+            lr_scheduler.step()
             preds = torch.argmax(outputs.logits, dim=-1)
          
             mask = batch['labels'] != self.tokenizer.pad_token_id
@@ -118,15 +153,17 @@ class WMT14(BenchmarkSet):
             avg_loss(loss.item())
             benchmark.stepEnd()
             benchmark.measureGPUMemUsageEnd(rank=device)
+            benchmark.add("train_loss",avg_loss.get())
 
 
         benchmark.add("acc_train",accuracy.get())
-        benchmark.add("train_loss",avg_loss.get())
+          
         benchmark.flush()
         return avg_loss.get(), accuracy.get()      
     @torch.no_grad()
     def test(self,model, device, test_loader, criterion):
         model.eval()
+        print("TEST NOW")
         benchmark = Benchmark.getInstance(None)
 
         decoded_references=[]
@@ -148,19 +185,20 @@ class WMT14(BenchmarkSet):
         #print(f"PRED: {decoded_predictions[4]}")
         #print(f"BLEU: {corpus_bleu([decoded_predictions[4]],[decoded_references[4]])}")
 
-        sacre_bleu = corpus_bleu(decoded_predictions, decoded_references,use_effective_order=True)
-        result = self.metric.compute(predictions=decoded_predictions, references=decoded_references)
+       # sacre_bleu = corpus_bleu(decoded_predictions, decoded_references,use_effective_order=True)
+        result = self.metric.compute(predictions=decoded_predictions, references=decoded_references, use_effective_order=True)
 
         #print(f"Bleu: {sacre_bleu.score} ")
 
         for i in range(5):
             print(f"\nREF: {decoded_references[i][0]}")
             print(f"PRED: {decoded_predictions[i]}")
-            print(f"BLEU: {corpus_bleu([decoded_predictions[i]],[decoded_references[i]],use_effective_order=True).score}")
+           # print(f"BLEU: {corpus_bleu([decoded_references[i]],[decoded_predictions[i]],use_effective_order=True).score}")
 
-        benchmark.add("bleu",result.score)
+        
+        benchmark.add("bleu",result["score"])
 
-        return result.score
+        return result["score"]
     def translate(self, model,device, sentence: str) -> str:
         
         model.eval()  # Set the model to evaluation mode

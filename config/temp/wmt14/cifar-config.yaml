@@ -1,5 +1,5 @@
 runs:
-  epochs: 8
+  epochs: 120
   name: "wmt14"
   dir: "./runs"
   lr_schedule_per_epoch: True
@@ -36,7 +36,9 @@ kpi:
     fqn: "GPU Memory usage"
     plot: "box"
 lr_scheduler:
-  type: "-"
+  type: "CosineAnnealingLR"
+  params:
+    T_max: 120
 optim:
   Apollo:
     name: "Apollo"
@@ -75,11 +77,11 @@ optim:
   Adam:
     name: "Adam"
     params:
-      lr: 0.001
+      lr: 0.0005
       beta1: 0.9
       beta2: 0.98
       eps: 0.000000001
-      weight_decay: 0
+      weight_decay: 0.01
   AdamW:
     name: "Adam"
     params:
