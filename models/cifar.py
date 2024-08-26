@@ -57,7 +57,8 @@ class CIFAR(BenchmarkSet):
         test_loader = DataLoader(testset, batch_size=self.batch_size, num_workers=1,worker_init_fn=CIFAR.seed_worker, generator=g)
         return (train_loader ,test_loader , val_loader)
     def getAssociatedModel(self,rank):
-        model =  ResNet110(num_classes=self.num_classes)      
+        model = models.resnet18()
+        model.fc = nn.Linear(model.fc.in_features, self.num_classes)   
         model = model.to(rank)
         
         ddp_model = torch.nn.DataParallel(model)#, device_ids=[rank])
@@ -69,12 +70,12 @@ class CIFAR(BenchmarkSet):
     def train(self, model, device, train_loader, optimizer, criterion,create_graph,lr_scheduler):
         model.train()
         print("CIFAR")
-        benchmark = Benchmark.getInstance(None)
+        #benchmark = Benchmark.getInstance(None)
         accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
         avg_loss = MeanAggregator()
         for inputs, targets in train_loader:
-            benchmark.measureGPUMemUsageStart(rank=device)
-            benchmark.stepStart()
+            #benchmark.measureGPUMemUsageStart(rank=device)
+            #benchmark.stepStart()
             inputs, targets = inputs.to(device), targets.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
@@ -86,18 +87,18 @@ class CIFAR(BenchmarkSet):
 
             avg_loss(loss.item())
             accuracy(predicted,targets)
-            benchmark.stepEnd()
-            benchmark.measureGPUMemUsageEnd(rank=device)
+            #benchmark.stepEnd()
+            #benchmark.measureGPUMemUsageEnd(rank=device)
 
-        benchmark.add("acc_train",accuracy.get())
-        benchmark.add("train_loss",avg_loss.get())
-        benchmark.flush()
+        #benchmark.add("acc_train",accuracy.get())
+        #benchmark.add("train_loss",avg_loss.get())
+       # benchmark.flush()
        
         return avg_loss.get(), accuracy.get()
     @torch.no_grad()
     def test(self,model, device, test_loader, criterion):
         model.eval()
-        benchmark = Benchmark.getInstance(None)
+        # = Benchmark.getInstance(None)
 
         accuracy = MeanAggregator(measure=lambda *args:(args[0].eq(args[1]).sum().item() / args[1].size(0)))
         avg_loss = MeanAggregator()
@@ -111,7 +112,7 @@ class CIFAR(BenchmarkSet):
                 avg_loss(loss.item())
                 accuracy(predicted,targets)
 
-            benchmark.add("acc_test",accuracy.get())
-            benchmark.add("test_loss",avg_loss.get())
+            #benchmark.add("acc_test",accuracy.get())
+            #benchmark.add("test_loss",avg_loss.get())
         return accuracy.get()
         
