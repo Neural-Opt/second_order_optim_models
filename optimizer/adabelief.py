@@ -26,10 +26,12 @@ class AdaBelief(Optimizer):
                     state['step'] = 0
                     state['exp_avg'] = torch.zeros_like(p.data)
                     state['exp_avg_sq'] = torch.zeros_like(p.data)
+                    state['exp_avg_h'] = torch.zeros_like(p.data)
+
                     if group['amsgrad']:
                         state['max_exp_avg_sq'] = torch.zeros_like(p.data)
 
-                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
+                exp_avg, exp_avg_sq, exp_avg_h = state['exp_avg'], state['exp_avg_sq'],  state['exp_avg_h']
                 beta1=group['beta1']
                 beta2=group['beta2']
 
@@ -44,7 +46,11 @@ class AdaBelief(Optimizer):
                 exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
 
                 grad_diff = grad - exp_avg
+                hessian_diag = self.calcHessian(p.grad,p)
                 exp_avg_sq.mul_(beta2).addcmul_(grad_diff, grad_diff, value=1 - beta2)
+                #H_t+1 = (b2)*H_t + (1-b2)*v_t^2
+                exp_avg_h.mul_(0.999).add_(hessian_diag, alpha=(1 - 0.999))
+                self.calcHessianApproxQuality(exp_avg_h,exp_avg_sq)
 
                 if group['amsgrad']:
                     max_exp_avg_sq = state['max_exp_avg_sq']
@@ -58,3 +64,17 @@ class AdaBelief(Optimizer):
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
 
         return loss
+    def calcHessian(self,grad,param):
+        hessian_diag = []
+        # Compute the second derivative (d2L/dw_i^2) using autograd
+        second_derivative = torch.autograd.grad(grad, param, grad_outputs=torch.ones_like(grad), retain_graph=True)[0]
+        hessian_diag.append(second_derivative.view(-1))
+        return torch.cat(hessian_diag).reshape(param.shape)
+    def calcHessianApproxQuality(self,hessian,approx):
+        hessian_flat = hessian.view(-1)
+        approx_flat = approx.view(-1)    
+        cos_sim = torch.nn.functional.cosine_similarity(hessian_flat, approx_flat, dim=0)
+        nmse = torch.mean((hessian - approx)**2) / (torch.var(hessian) + 1e-8)
+
+        self.benchmark.add("cosine_sim",cos_sim.item())
+        self.benchmark.add("nmse",nmse.item())    

@@ -1,5 +1,5 @@
 runs:
-  epochs: 200
+  epochs: 120
   name: "cifar10-cosine"
   dir: "./runs"
   lr_schedule_per_epoch: True
@@ -36,9 +36,10 @@ kpi:
     fqn: "GPU Memory usage"
     plot: "box"
 lr_scheduler:
-  type: "CosineAnnealingLR"
+  type: "MultiStepLR"
   params:
-    T_max: 200
+    milestones: [40,80]
+    gamma: 0.1
 optim:
   Apollo:
     name: "Apollo"

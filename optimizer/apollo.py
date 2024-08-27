@@ -77,6 +77,7 @@ class Apollo(Optimizer):
                     state['step'] = 0
                     # Exponential moving average of gradient values
                     state['exp_avg_grad'] = torch.zeros_like(p, memory_format=torch.preserve_format)
+                    state['exp_avg_h'] = torch.zeros_like(p.data, memory_format=torch.preserve_format)
                     # Exponential moving average of squared gradient values
                     state['approx_hessian'] = torch.zeros_like(p, memory_format=torch.preserve_format)
                     # Previous update direction
@@ -100,6 +101,7 @@ class Apollo(Optimizer):
                 beta = group['beta']
                 eps = group['eps']
                 exp_avg_grad = state['exp_avg_grad']
+                exp_avg_h = state['exp_avg_h']
                 B = state['approx_hessian']
                 d_p = state['update']
 
@@ -143,5 +145,24 @@ class Apollo(Optimizer):
                     d_p.add_(p, alpha=weight_decay)
 
                 p.add_(d_p, alpha=-curr_lr)
+                hessian_diag = self.calcHessian(p.grad,p)
+                exp_avg_h.mul_(0.999).add_(hessian_diag, alpha=(1 - 0.999))
+
+
 
         return loss
+
+    def calcHessian(self,grad,param):
+        hessian_diag = []
+        # Compute the second derivative (d2L/dw_i^2) using autograd
+        second_derivative = torch.autograd.grad(grad, param, grad_outputs=torch.ones_like(grad), retain_graph=True)[0]
+        hessian_diag.append(second_derivative.view(-1))
+        return torch.cat(hessian_diag).reshape(param.shape)
+    def calcHessianApproxQuality(self,hessian,approx):
+        hessian_flat = hessian.view(-1)
+        approx_flat = approx.view(-1)    
+        cos_sim = torch.nn.functional.cosine_similarity(hessian_flat, approx_flat, dim=0)
+        nmse = torch.mean((hessian - approx)**2) / (torch.var(hessian) + 1e-8)
+
+        self.benchmark.add("cosine_sim",cos_sim.item())
+        self.benchmark.add("nmse",nmse.item())    

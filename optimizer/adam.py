@@ -36,9 +36,9 @@ class Adam(Optimizer):
                     state['step'] = 0
                     state['exp_avg'] = torch.zeros_like(p.data)
                     state['exp_avg_sq'] = torch.zeros_like(p.data)
-                    state['exp_avg_hq'] = torch.zeros_like(p.data)
+                    state['exp_avg_h'] = torch.zeros_like(p.data)
                    
-                exp_avg, exp_avg_sq, exp_avg_hq = state['exp_avg'], state['exp_avg_sq'],  state['exp_avg_hq']
+                exp_avg, exp_avg_sq, exp_avg_h = state['exp_avg'], state['exp_avg_sq'],  state['exp_avg_h']
                 #exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
 
                 beta1 = group['beta1']
@@ -57,14 +57,14 @@ class Adam(Optimizer):
                 #v_t+1 = (b2)*v_t + (1-b2)*v_t^2
                 exp_avg_sq.mul_(beta2).addcmul_(grad, grad, value=1 - beta2)
                 #H_t+1 = (b2)*H_t + (1-b2)*v_t^2
-
-                exp_avg_hq.mul_(beta2).add_(hessian_diag, alpha=1 - beta2)
-        
+                exp_avg_h.mul_(0.999).add_(hessian_diag, alpha=(1 - 0.999))
+                self.calcHessianApproxQuality(exp_avg_h,exp_avg_sq)
+                
                 denom = exp_avg_sq.sqrt().add_(group['eps'])
                 step_size = group['lr'] * (1 - beta2 ** state['step']) ** 0.5 / (1 - beta1 ** state['step'])
              
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
-                self.calcHessianApproxQuality(exp_avg_hq,exp_avg_sq)
+                
                # self.compute_diagonal_hessian()
         return loss
 
