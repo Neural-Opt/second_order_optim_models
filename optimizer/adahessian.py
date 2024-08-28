@@ -130,6 +130,7 @@ class AdaHessian(Optimizer):
                     state['step'] = 0
                     state['exp_avg'] = torch.zeros_like(p.data)  # Exponential moving average of gradient values
                     state['exp_hessian_diag_sq'] = torch.zeros_like(p.data)  # Exponential moving average of Hessian diagonal square values
+                    state['exp_avg_h'] = torch.zeros_like(p.data)
 
                 # Calculate current lr
                 if state['step'] < group['warmup']:
@@ -140,7 +141,7 @@ class AdaHessian(Optimizer):
                 # Perform correct stepweight decay as in AdamW
                 p.mul_(1 - curr_lr * group['weight_decay'])
 
-                exp_avg, exp_hessian_diag_sq = state['exp_avg'], state['exp_hessian_diag_sq']
+                exp_avg, exp_hessian_diag_sq, exp_avg_h = state['exp_avg'], state['exp_hessian_diag_sq'],state['exp_avg_h']
                 beta1 = group['beta1']
                 beta2 = group['beta2']
                 state['step'] += 1
@@ -149,6 +150,11 @@ class AdaHessian(Optimizer):
                 exp_avg.mul_(beta1).add_(p.grad, alpha=1 - beta1)
                 exp_hessian_diag_sq.mul_(beta2).addcmul_(p.hess, p.hess, value=1 - beta2)
 
+                hessian_diag = self.calcHessian(p.grad,p)
+                exp_avg_h.mul_(0.999).add_(hessian_diag, alpha=(1 - 0.999))
+        
+                self.calcHessianApproxQuality(exp_avg_h,exp_hessian_diag_sq)
+                
                 bias_correction1 = 1 - beta1 ** state['step']
                 bias_correction2 = 1 - beta2 ** state['step']
 
@@ -160,3 +166,21 @@ class AdaHessian(Optimizer):
                 p.addcdiv_(exp_avg, denom, value=-step_size)
 
         return loss
+
+
+
+    def calcHessian(self,grad,param):
+        hessian_diag = []
+        # Compute the second derivative (d2L/dw_i^2) using autograd
+        second_derivative = torch.autograd.grad(grad, param, grad_outputs=torch.ones_like(grad), retain_graph=True)[0]
+        hessian_diag.append(second_derivative.view(-1))
+        return torch.cat(hessian_diag).reshape(param.shape)
+    def calcHessianApproxQuality(self,hessian,approx):
+        benchmark = Benchmark.getInstance(None)
+        hessian_flat = hessian.view(-1)
+        approx_flat = approx.view(-1)    
+        cos_sim = torch.nn.functional.cosine_similarity(hessian_flat, approx_flat, dim=0)
+        nmse = torch.mean((hessian - approx)**2) / (torch.var(hessian) + 1e-8)
+
+        benchmark.add("cosine_sim",cos_sim.item())
+        benchmark.add("nmse",nmse.item()) 

@@ -71,10 +71,11 @@ class AdaBelief(Optimizer):
         hessian_diag.append(second_derivative.view(-1))
         return torch.cat(hessian_diag).reshape(param.shape)
     def calcHessianApproxQuality(self,hessian,approx):
+        benchmark = Benchmark.getInstance(None)
         hessian_flat = hessian.view(-1)
         approx_flat = approx.view(-1)    
         cos_sim = torch.nn.functional.cosine_similarity(hessian_flat, approx_flat, dim=0)
         nmse = torch.mean((hessian - approx)**2) / (torch.var(hessian) + 1e-8)
 
-        self.benchmark.add("cosine_sim",cos_sim.item())
-        self.benchmark.add("nmse",nmse.item())    
+        benchmark.add("cosine_sim",cos_sim.item())
+        benchmark.add("nmse",nmse.item())   

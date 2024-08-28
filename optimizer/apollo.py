@@ -134,6 +134,11 @@ class Apollo(Optimizer):
                 else:
                     denom = B.abs().clamp_(min=rebound)
 
+                hessian_diag = self.calcHessian(p.grad,p)
+                exp_avg_h.mul_(0.999).add_(hessian_diag, alpha=(1 - 0.999))
+        
+                self.calcHessianApproxQuality(exp_avg_h,denom)
+
                 d_p.copy_(exp_avg_grad.div(denom))
 
                 # Perform step weight decay
@@ -145,9 +150,7 @@ class Apollo(Optimizer):
                     d_p.add_(p, alpha=weight_decay)
 
                 p.add_(d_p, alpha=-curr_lr)
-                hessian_diag = self.calcHessian(p.grad,p)
-                exp_avg_h.mul_(0.999).add_(hessian_diag, alpha=(1 - 0.999))
-
+                
 
 
         return loss
@@ -159,10 +162,11 @@ class Apollo(Optimizer):
         hessian_diag.append(second_derivative.view(-1))
         return torch.cat(hessian_diag).reshape(param.shape)
     def calcHessianApproxQuality(self,hessian,approx):
+        benchmark = Benchmark.getInstance(None)
         hessian_flat = hessian.view(-1)
         approx_flat = approx.view(-1)    
         cos_sim = torch.nn.functional.cosine_similarity(hessian_flat, approx_flat, dim=0)
         nmse = torch.mean((hessian - approx)**2) / (torch.var(hessian) + 1e-8)
 
-        self.benchmark.add("cosine_sim",cos_sim.item())
-        self.benchmark.add("nmse",nmse.item())    
+        benchmark.add("cosine_sim",cos_sim.item())
+        benchmark.add("nmse",nmse.item()) 
