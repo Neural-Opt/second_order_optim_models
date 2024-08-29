@@ -1,5 +1,5 @@
 runs:
-  epochs: 120
+  epochs: 100
   name: "cifar10-hessian-approx"
   dir: "./runs"
   lr_schedule_per_epoch: True
