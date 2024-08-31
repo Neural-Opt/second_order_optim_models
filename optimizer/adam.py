@@ -62,7 +62,7 @@ class Adam(Optimizer):
              
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
                
-                self.compute_diagonal_hessian()
+                #self.compute_diagonal_hessian()
         return loss
 
     def calcHessianApproxQuality(self,grad,param):

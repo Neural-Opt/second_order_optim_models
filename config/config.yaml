@@ -35,6 +35,18 @@ kpi:
     unit: "MB"
     fqn: "GPU Memory usage"
     plot: "box"
+  - name: "bleu"
+    unit: ""
+    fqn: "BLEU Score"
+    plot: "graph"
+  - name: "cosine_sim"
+    unit: ""
+    fqn: "Cosine Similarity"
+    plot: "box"
+  - name: "nmse"
+    unit: ""
+    fqn: "NMSE"
+    plot: "box"
 lr_scheduler:
   type: "-"
 optim:
@@ -75,7 +87,7 @@ optim:
   Adam:
     name: "Adam"
     params:
-      lr: 0.001
+      lr: 0.0005
       beta1: 0.9
       beta2: 0.98
       eps: 0.000000001
@@ -83,20 +95,20 @@ optim:
   AdamW:
     name: "Adam"
     params:
-      lr: 0.001
+      lr: 0.0005
       beta1: 0.9
-      beta2: 0.999
-      eps: 0.00000001
+      beta2: 0.98
+      eps: 0.000000001
       weight_decay: 0.0001
       weight_decouple: True
 
   AdaBelief:
     name: "AdaBelief"
     params:
-      lr: 0.001
+      lr: 0.0005
       beta1: 0.9
       beta2: 0.999
-      eps: 0.00000001
+      eps:  0.000000001
       weight_decay: 0.0001
       weight_decouple: True
 
@@ -110,9 +122,9 @@ optim:
   SGD:
     name: "SGD"
     params:
-      lr: 0.1
+      lr: 0.005
       momentum: 0.9
-      weight_decay: 0.0001
+      weight_decay: 0
 
 
 #this will train the optims with all their optimal values

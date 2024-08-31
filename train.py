@@ -64,7 +64,7 @@ def main(device:int,base_path:str,world_size:int,num_epochs:int = 25):
     dataset = getBenchmarkSet()
     train_loader ,test_loader,len_train = dataset.getDataLoader()
     criterion = dataset.getAssociatedCriterion()
-    names,optimizers,params = getOptim(["AdaBelief","AdaHessian","AdamW","Apollo","ApolloW","RMSprop","SGD"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
+    names,optimizers,params = getOptim(["AdaHessian","AdaBelief","Adam","AdamW","Apollo","ApolloW","RMSprop"])#["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
 
     for optim_class, name in zip(optimizers, names):
       
