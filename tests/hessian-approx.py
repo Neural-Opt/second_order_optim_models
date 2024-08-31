@@ -132,8 +132,6 @@ def calcHessian(loss,model):
     for param in model.parameters():
         if param.requires_grad:
             grad = torch.autograd.grad(loss, param, create_graph=True)[0]
-            
-            # Berechne die zweite Ableitung für jedes Element in 'param' individuell
             for i in range(grad.numel()):
                 grad_i = grad.flatten()[i]
                 grad2_i = torch.autograd.grad(grad_i, param, retain_graph=True)[0].flatten()[i]
@@ -143,7 +141,6 @@ def calcHessian(loss,model):
     hessian_diag = hessian_diag.detach()
     return hessian_diag
 
-# Setze das Gerät auf GPU, falls verfügbar
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Einfaches CNN-Modell für MNIST mit etwa 10.000 Parametern
