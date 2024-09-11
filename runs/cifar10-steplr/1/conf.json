@@ -7,7 +7,7 @@
     },
     "dataset": {
         "name": "cifar10-steplr",
-        "path": "./data/cifar10-steplr"
+        "path": "./data/cifar10"
     },
     "kpi": [
         {
@@ -51,6 +51,24 @@
             "unit": "MB",
             "fqn": "GPU Memory usage",
             "plot": "box"
+        },
+        {
+            "name": "bleu",
+            "unit": "",
+            "fqn": "BLEU Score",
+            "plot": "graph"
+        },
+        {
+            "name": "cosine_sim",
+            "unit": "",
+            "fqn": "Cosine Similarity",
+            "plot": "box"
+        },
+        {
+            "name": "nmse",
+            "unit": "",
+            "fqn": "NMSE",
+            "plot": "box"
         }
     ],
     "lr_scheduler": {
@@ -73,7 +91,7 @@
                 "beta": 0.9,
                 "warmup": 500,
                 "weight_decay_type": "L2",
-                "weight_decay": 0.00025,
+                "weight_decay": 0.0001,
                 "rebound": "constant"
             }
         },
@@ -86,7 +104,7 @@
                 "beta": 0.9,
                 "warmup": 500,
                 "weight_decay_type": "decoupled",
-                "weight_decay": 0.025,
+                "weight_decay": 0.01,
                 "rebound": "constant"
             }
         },
@@ -107,32 +125,32 @@
         "Adam": {
             "name": "Adam",
             "params": {
-                "lr": 0.001,
+                "lr": 0.0005,
                 "beta1": 0.9,
-                "beta2": 0.999,
-                "eps": 1e-08,
-                "weight_decay": 0.0025
+                "beta2": 0.98,
+                "eps": 1e-09,
+                "weight_decay": 0
             }
         },
         "AdamW": {
             "name": "Adam",
             "params": {
-                "lr": 0.001,
+                "lr": 0.0005,
                 "beta1": 0.9,
-                "beta2": 0.999,
-                "eps": 1e-08,
-                "weight_decay": 0.0025,
+                "beta2": 0.98,
+                "eps": 1e-09,
+                "weight_decay": 0.0001,
                 "weight_decouple": true
             }
         },
         "AdaBelief": {
             "name": "AdaBelief",
             "params": {
-                "lr": 0.001,
+                "lr": 0.0005,
                 "beta1": 0.9,
                 "beta2": 0.999,
-                "eps": 1e-08,
-                "weight_decay": 0.0025,
+                "eps": 1e-09,
+                "weight_decay": 0.0001,
                 "weight_decouple": true
             }
         },
@@ -142,15 +160,26 @@
                 "lr": 0.001,
                 "alpha": 0.99,
                 "eps": 1e-08,
-                "weight_decay": 0.0025
+                "weight_decay": 0.0001
             }
         },
         "SGD": {
             "name": "SGD",
             "params": {
-                "lr": 0.001,
+                "lr": 0.005,
                 "momentum": 0.9,
-                "weight_decay": 0.0025
+                "weight_decay": 0
+            }
+        },
+        "AdamJan": {
+            "name": "AdamJan",
+            "params": {
+                "lr": 0.001,
+                "beta1": 0.9,
+                "beta2": 0.999,
+                "eps": 1e-08,
+                "weight_decay": 0.00025,
+                "weight_decouple": true
             }
         }
     }

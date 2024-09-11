@@ -32,6 +32,7 @@ class Logger:
 
     def getData(self):
         output = {}
+        
         for d in os.listdir(self.base_path):
             if d == "conf.json" or d == "result_plot.png":
                 continue

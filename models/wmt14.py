@@ -65,7 +65,7 @@ class WMT14(BenchmarkSet):
         if self.lr_scheduler == None:
             self.lr_scheduler =  InverseSquareRootLR(
                                         optim,
-                                        warmup_steps=4000,
+                                        warmup_steps=40,
                                         min_lr=1e-9,
                                         init_lr=optim.param_groups[0]['lr']
 )
@@ -73,8 +73,8 @@ class WMT14(BenchmarkSet):
     def setup(self):
 
        # print(len(self.dataset['train']))
-        self.dataset['train'] =  self.dataset['train']#.select(range(200000))
-        self.dataset['test'] =  self.dataset['test']#.select(range(1000))
+        self.dataset['train'] =  self.dataset['train'].select(range(10000))
+        self.dataset['test'] =  self.dataset['test'].select(range(1000))
 
        
         self.tokenized_datasets = self.dataset.map(self.preprocess, batched=True,load_from_cache_file=False)

@@ -1,0 +1,83 @@
+
+The following have been reloaded with a version change:
+  1) CUDA/12.1.1 => CUDA/12.4.0
+
+
+The following have been reloaded with a version change:
+  1) GCCcore/12.3.0 => GCCcore/13.3.0
+  2) OpenSSL/1.1 => OpenSSL/3
+  3) Python/3.11.3-GCCcore-12.3.0 => Python/3.12.3-GCCcore-13.3.0
+  4) SQLite/3.42.0-GCCcore-12.3.0 => SQLite/3.45.3-GCCcore-13.3.0
+  5) Tcl/8.6.13-GCCcore-12.3.0 => Tcl/8.6.14-GCCcore-13.3.0
+  6) XZ/5.4.2-GCCcore-12.3.0 => XZ/5.4.5-GCCcore-13.3.0
+  7) binutils/2.40-GCCcore-12.3.0 => binutils/2.42-GCCcore-13.3.0
+  8) bzip2/1.0.8-GCCcore-12.3.0 => bzip2/1.0.8-GCCcore-13.3.0
+  9) libffi/3.4.4-GCCcore-12.3.0 => libffi/3.4.5-GCCcore-13.3.0
+ 10) libreadline/8.2-GCCcore-12.3.0 => libreadline/8.2-GCCcore-13.3.0
+ 11) ncurses/6.4-GCCcore-12.3.0 => ncurses/6.5-GCCcore-13.3.0
+ 12) zlib/1.2.13-GCCcore-12.3.0 => zlib/1.3.1-GCCcore-13.3.0
+
+
+The following have been reloaded with a version change:
+  1) CUDA/12.4.0 => CUDA/12.1.1
+  2) GCCcore/13.3.0 => GCCcore/12.3.0
+  3) OpenSSL/3 => OpenSSL/1.1
+  4) Python/3.12.3-GCCcore-13.3.0 => Python/3.11.3-GCCcore-12.3.0
+  5) SQLite/3.45.3-GCCcore-13.3.0 => SQLite/3.42.0-GCCcore-12.3.0
+  6) Tcl/8.6.14-GCCcore-13.3.0 => Tcl/8.6.13-GCCcore-12.3.0
+  7) XZ/5.4.5-GCCcore-13.3.0 => XZ/5.4.2-GCCcore-12.3.0
+  8) binutils/2.42-GCCcore-13.3.0 => binutils/2.40-GCCcore-12.3.0
+  9) bzip2/1.0.8-GCCcore-13.3.0 => bzip2/1.0.8-GCCcore-12.3.0
+ 10) libffi/3.4.5-GCCcore-13.3.0 => libffi/3.4.4-GCCcore-12.3.0
+ 11) libreadline/8.2-GCCcore-13.3.0 => libreadline/8.2-GCCcore-12.3.0
+ 12) ncurses/6.5-GCCcore-13.3.0 => ncurses/6.4-GCCcore-12.3.0
+ 13) zlib/1.3.1-GCCcore-13.3.0 => zlib/1.2.13-GCCcore-12.3.0
+
+/home/s6jahard/.local/lib/python3.11/site-packages/torchvision/io/image.py:13: UserWarning: Failed to load image Python extension: '/home/s6jahard/.local/lib/python3.11/site-packages/torchvision/image.so: undefined symbol: _ZN3c106detail23torchInternalAssertFailEPKcS2_jS2_RKSs'If you don't plan on using image functionality from `torchvision.io`, you can ignore this warning. Otherwise, there might be something wrong with your environment. Did you have `libjpeg` or `libpng` installed before building `torchvision` from source?
+  warn(
+cuda
+Files already downloaded and verified
+Files already downloaded and verified
+Number of params: 1730714
+{'lr': 0.001, 'beta1': 0.9, 'beta2': 0.999, 'eps': 1e-08, 'weight_decouple': True, 'weight_decay': 0.00025}
+Training Progress:   0%|          | 0/80 [00:00<?, ?epoch/s]CIFAR
+Training Progress:   0%|          | 0/80 [00:38<?, ?epoch/s, optim=AdamJan, lr=0, loss=1.7560, train-accuracy=0.3483, test-accuracy=0.4341]Training Progress:   1%|▏         | 1/80 [00:38<50:18, 38.21s/epoch, optim=AdamJan, lr=0, loss=1.7560, train-accuracy=0.3483, test-accuracy=0.4341]CIFAR
+Training Progress:   1%|▏         | 1/80 [01:07<50:18, 38.21s/epoch, optim=AdamJan, lr=0, loss=1.3452, train-accuracy=0.5104, test-accuracy=0.5523]Training Progress:   2%|▎         | 2/80 [01:07<43:02, 33.11s/epoch, optim=AdamJan, lr=0, loss=1.3452, train-accuracy=0.5104, test-accuracy=0.5523]CIFAR
+Training Progress:   2%|▎         | 2/80 [01:37<43:02, 33.11s/epoch, optim=AdamJan, lr=0, loss=1.1304, train-accuracy=0.5952, test-accuracy=0.5708]Training Progress:   4%|▍         | 3/80 [01:37<40:18, 31.41s/epoch, optim=AdamJan, lr=0, loss=1.1304, train-accuracy=0.5952, test-accuracy=0.5708]CIFAR
+Training Progress:   4%|▍         | 3/80 [02:07<40:18, 31.41s/epoch, optim=AdamJan, lr=0, loss=0.9688, train-accuracy=0.6557, test-accuracy=0.5797]Training Progress:   5%|▌         | 4/80 [02:07<39:20, 31.06s/epoch, optim=AdamJan, lr=0, loss=0.9688, train-accuracy=0.6557, test-accuracy=0.5797]CIFAR
+Training Progress:   5%|▌         | 4/80 [02:37<39:20, 31.06s/epoch, optim=AdamJan, lr=0, loss=0.8640, train-accuracy=0.6972, test-accuracy=0.6955]Training Progress:   6%|▋         | 5/80 [02:37<38:06, 30.49s/epoch, optim=AdamJan, lr=0, loss=0.8640, train-accuracy=0.6972, test-accuracy=0.6955]CIFAR
+Training Progress:   6%|▋         | 5/80 [03:06<38:06, 30.49s/epoch, optim=AdamJan, lr=0, loss=0.7684, train-accuracy=0.7338, test-accuracy=0.7214]Training Progress:   8%|▊         | 6/80 [03:06<37:17, 30.23s/epoch, optim=AdamJan, lr=0, loss=0.7684, train-accuracy=0.7338, test-accuracy=0.7214]CIFAR
+Training Progress:   8%|▊         | 6/80 [03:37<37:17, 30.23s/epoch, optim=AdamJan, lr=0, loss=0.7046, train-accuracy=0.7552, test-accuracy=0.6999]Training Progress:   9%|▉         | 7/80 [03:37<36:53, 30.32s/epoch, optim=AdamJan, lr=0, loss=0.7046, train-accuracy=0.7552, test-accuracy=0.6999]CIFAR
+Training Progress:   9%|▉         | 7/80 [04:08<36:53, 30.32s/epoch, optim=AdamJan, lr=0, loss=0.6493, train-accuracy=0.7762, test-accuracy=0.7125]Training Progress:  10%|█         | 8/80 [04:08<36:47, 30.66s/epoch, optim=AdamJan, lr=0, loss=0.6493, train-accuracy=0.7762, test-accuracy=0.7125]CIFAR
+Training Progress:  10%|█         | 8/80 [04:39<36:47, 30.66s/epoch, optim=AdamJan, lr=0, loss=0.6084, train-accuracy=0.7902, test-accuracy=0.7464]Training Progress:  11%|█▏        | 9/80 [04:39<36:18, 30.68s/epoch, optim=AdamJan, lr=0, loss=0.6084, train-accuracy=0.7902, test-accuracy=0.7464]CIFAR
+Training Progress:  11%|█▏        | 9/80 [05:09<36:18, 30.68s/epoch, optim=AdamJan, lr=0, loss=0.5667, train-accuracy=0.8049, test-accuracy=0.7347]Training Progress:  12%|█▎        | 10/80 [05:09<35:28, 30.41s/epoch, optim=AdamJan, lr=0, loss=0.5667, train-accuracy=0.8049, test-accuracy=0.7347]CIFAR
+Training Progress:  12%|█▎        | 10/80 [05:38<35:28, 30.41s/epoch, optim=AdamJan, lr=0, loss=0.5342, train-accuracy=0.8147, test-accuracy=0.7650]Training Progress:  14%|█▍        | 11/80 [05:38<34:40, 30.16s/epoch, optim=AdamJan, lr=0, loss=0.5342, train-accuracy=0.8147, test-accuracy=0.7650]CIFAR
+Training Progress:  14%|█▍        | 11/80 [06:09<34:40, 30.16s/epoch, optim=AdamJan, lr=0, loss=0.5025, train-accuracy=0.8257, test-accuracy=0.7350]Training Progress:  15%|█▌        | 12/80 [06:09<34:20, 30.30s/epoch, optim=AdamJan, lr=0, loss=0.5025, train-accuracy=0.8257, test-accuracy=0.7350]CIFAR
+Training Progress:  15%|█▌        | 12/80 [06:39<34:20, 30.30s/epoch, optim=AdamJan, lr=0, loss=0.4812, train-accuracy=0.8342, test-accuracy=0.7734]Training Progress:  16%|█▋        | 13/80 [06:39<33:38, 30.13s/epoch, optim=AdamJan, lr=0, loss=0.4812, train-accuracy=0.8342, test-accuracy=0.7734]CIFAR
+Training Progress:  16%|█▋        | 13/80 [07:09<33:38, 30.13s/epoch, optim=AdamJan, lr=0, loss=0.4549, train-accuracy=0.8428, test-accuracy=0.7820]Training Progress:  18%|█▊        | 14/80 [07:09<33:13, 30.20s/epoch, optim=AdamJan, lr=0, loss=0.4549, train-accuracy=0.8428, test-accuracy=0.7820]CIFAR
+Training Progress:  18%|█▊        | 14/80 [07:39<33:13, 30.20s/epoch, optim=AdamJan, lr=0, loss=0.4351, train-accuracy=0.8481, test-accuracy=0.7918]Training Progress:  19%|█▉        | 15/80 [07:39<32:35, 30.09s/epoch, optim=AdamJan, lr=0, loss=0.4351, train-accuracy=0.8481, test-accuracy=0.7918]CIFAR
+Training Progress:  19%|█▉        | 15/80 [08:09<32:35, 30.09s/epoch, optim=AdamJan, lr=0, loss=0.4190, train-accuracy=0.8543, test-accuracy=0.7746]Training Progress:  20%|██        | 16/80 [08:09<31:58, 29.98s/epoch, optim=AdamJan, lr=0, loss=0.4190, train-accuracy=0.8543, test-accuracy=0.7746]CIFAR
+Training Progress:  20%|██        | 16/80 [08:39<31:58, 29.98s/epoch, optim=AdamJan, lr=0, loss=0.4012, train-accuracy=0.8619, test-accuracy=0.8110]Training Progress:  21%|██▏       | 17/80 [08:39<31:28, 29.98s/epoch, optim=AdamJan, lr=0, loss=0.4012, train-accuracy=0.8619, test-accuracy=0.8110]CIFAR
+Training Progress:  21%|██▏       | 17/80 [09:09<31:28, 29.98s/epoch, optim=AdamJan, lr=0, loss=0.3847, train-accuracy=0.8657, test-accuracy=0.7713]Training Progress:  22%|██▎       | 18/80 [09:09<31:12, 30.21s/epoch, optim=AdamJan, lr=0, loss=0.3847, train-accuracy=0.8657, test-accuracy=0.7713]CIFAR
+Training Progress:  22%|██▎       | 18/80 [09:40<31:12, 30.21s/epoch, optim=AdamJan, lr=0, loss=0.3665, train-accuracy=0.8724, test-accuracy=0.7815]Training Progress:  24%|██▍       | 19/80 [09:40<30:58, 30.47s/epoch, optim=AdamJan, lr=0, loss=0.3665, train-accuracy=0.8724, test-accuracy=0.7815]CIFAR
+Training Progress:  24%|██▍       | 19/80 [10:12<30:58, 30.47s/epoch, optim=AdamJan, lr=0, loss=0.3571, train-accuracy=0.8758, test-accuracy=0.8107]Training Progress:  25%|██▌       | 20/80 [10:12<30:47, 30.80s/epoch, optim=AdamJan, lr=0, loss=0.3571, train-accuracy=0.8758, test-accuracy=0.8107]CIFAR
+Training Progress:  25%|██▌       | 20/80 [10:43<30:47, 30.80s/epoch, optim=AdamJan, lr=0, loss=0.3402, train-accuracy=0.8822, test-accuracy=0.8111]Training Progress:  26%|██▋       | 21/80 [10:43<30:18, 30.83s/epoch, optim=AdamJan, lr=0, loss=0.3402, train-accuracy=0.8822, test-accuracy=0.8111]CIFAR
+Training Progress:  26%|██▋       | 21/80 [11:14<30:18, 30.83s/epoch, optim=AdamJan, lr=0, loss=0.3322, train-accuracy=0.8845, test-accuracy=0.8031]Training Progress:  28%|██▊       | 22/80 [11:14<29:49, 30.85s/epoch, optim=AdamJan, lr=0, loss=0.3322, train-accuracy=0.8845, test-accuracy=0.8031]CIFAR
+Training Progress:  28%|██▊       | 22/80 [11:44<29:49, 30.85s/epoch, optim=AdamJan, lr=0, loss=0.3165, train-accuracy=0.8894, test-accuracy=0.8250]Training Progress:  29%|██▉       | 23/80 [11:44<29:11, 30.73s/epoch, optim=AdamJan, lr=0, loss=0.3165, train-accuracy=0.8894, test-accuracy=0.8250]CIFAR
+Training Progress:  29%|██▉       | 23/80 [12:15<29:11, 30.73s/epoch, optim=AdamJan, lr=0, loss=0.3059, train-accuracy=0.8930, test-accuracy=0.8241]Training Progress:  30%|███       | 24/80 [12:15<28:36, 30.64s/epoch, optim=AdamJan, lr=0, loss=0.3059, train-accuracy=0.8930, test-accuracy=0.8241]CIFAR
+Training Progress:  30%|███       | 24/80 [12:44<28:36, 30.64s/epoch, optim=AdamJan, lr=0, loss=0.2857, train-accuracy=0.9017, test-accuracy=0.8217]Training Progress:  31%|███▏      | 25/80 [12:44<27:48, 30.34s/epoch, optim=AdamJan, lr=0, loss=0.2857, train-accuracy=0.9017, test-accuracy=0.8217]CIFAR
+Training Progress:  31%|███▏      | 25/80 [13:14<27:48, 30.34s/epoch, optim=AdamJan, lr=0, loss=0.2815, train-accuracy=0.9007, test-accuracy=0.8136]Training Progress:  32%|███▎      | 26/80 [13:14<27:05, 30.11s/epoch, optim=AdamJan, lr=0, loss=0.2815, train-accuracy=0.9007, test-accuracy=0.8136]CIFAR
+Training Progress:  32%|███▎      | 26/80 [13:45<27:05, 30.11s/epoch, optim=AdamJan, lr=0, loss=0.2775, train-accuracy=0.9033, test-accuracy=0.7975]Training Progress:  34%|███▍      | 27/80 [13:45<26:54, 30.46s/epoch, optim=AdamJan, lr=0, loss=0.2775, train-accuracy=0.9033, test-accuracy=0.7975]CIFAR
+Training Progress:  34%|███▍      | 27/80 [14:15<26:54, 30.46s/epoch, optim=AdamJan, lr=0, loss=0.2639, train-accuracy=0.9079, test-accuracy=0.8380]Training Progress:  35%|███▌      | 28/80 [14:15<26:16, 30.32s/epoch, optim=AdamJan, lr=0, loss=0.2639, train-accuracy=0.9079, test-accuracy=0.8380]CIFAR
+Training Progress:  35%|███▌      | 28/80 [14:47<26:16, 30.32s/epoch, optim=AdamJan, lr=0, loss=0.2542, train-accuracy=0.9112, test-accuracy=0.8212]Training Progress:  36%|███▋      | 29/80 [14:47<26:03, 30.65s/epoch, optim=AdamJan, lr=0, loss=0.2542, train-accuracy=0.9112, test-accuracy=0.8212]CIFAR
+Training Progress:  36%|███▋      | 29/80 [15:18<26:03, 30.65s/epoch, optim=AdamJan, lr=0, loss=0.2433, train-accuracy=0.9133, test-accuracy=0.8179]Training Progress:  38%|███▊      | 30/80 [15:18<25:37, 30.75s/epoch, optim=AdamJan, lr=0, loss=0.2433, train-accuracy=0.9133, test-accuracy=0.8179]CIFAR
+Training Progress:  38%|███▊      | 30/80 [15:49<25:37, 30.75s/epoch, optim=AdamJan, lr=0, loss=0.2381, train-accuracy=0.9182, test-accuracy=0.8164]Training Progress:  39%|███▉      | 31/80 [15:49<25:15, 30.93s/epoch, optim=AdamJan, lr=0, loss=0.2381, train-accuracy=0.9182, test-accuracy=0.8164]CIFAR
+Training Progress:  39%|███▉      | 31/80 [16:19<25:15, 30.93s/epoch, optim=AdamJan, lr=0, loss=0.2362, train-accuracy=0.9175, test-accuracy=0.7933]Training Progress:  40%|████      | 32/80 [16:19<24:30, 30.63s/epoch, optim=AdamJan, lr=0, loss=0.2362, train-accuracy=0.9175, test-accuracy=0.7933]CIFAR
+Training Progress:  40%|████      | 32/80 [16:48<24:30, 30.63s/epoch, optim=AdamJan, lr=0, loss=0.2233, train-accuracy=0.9218, test-accuracy=0.8241]Training Progress:  41%|████▏     | 33/80 [16:48<23:45, 30.33s/epoch, optim=AdamJan, lr=0, loss=0.2233, train-accuracy=0.9218, test-accuracy=0.8241]CIFAR
+Training Progress:  41%|████▏     | 33/80 [17:19<23:45, 30.33s/epoch, optim=AdamJan, lr=0, loss=0.2166, train-accuracy=0.9246, test-accuracy=0.8332]Training Progress:  42%|████▎     | 34/80 [17:19<23:13, 30.30s/epoch, optim=AdamJan, lr=0, loss=0.2166, train-accuracy=0.9246, test-accuracy=0.8332]CIFAR
+Training Progress:  42%|████▎     | 34/80 [17:49<23:13, 30.30s/epoch, optim=AdamJan, lr=0, loss=0.2130, train-accuracy=0.9252, test-accuracy=0.8250]Training Progress:  44%|████▍     | 35/80 [17:49<22:46, 30.36s/epoch, optim=AdamJan, lr=0, loss=0.2130, train-accuracy=0.9252, test-accuracy=0.8250]CIFAR
+Training Progress:  44%|████▍     | 35/80 [18:19<22:46, 30.36s/epoch, optim=AdamJan, lr=0, loss=0.2052, train-accuracy=0.9285, test-accuracy=0.8216]Training Progress:  45%|████▌     | 36/80 [18:19<22:10, 30.24s/epoch, optim=AdamJan, lr=0, loss=0.2052, train-accuracy=0.9285, test-accuracy=0.8216]CIFAR
+Training Progress:  45%|████▌     | 36/80 [18:49<22:10, 30.24s/epoch, optim=AdamJan, lr=0, loss=0.1994, train-accuracy=0.9304, test-accuracy=0.8515]Training Progress:  46%|████▋     | 37/80 [18:49<21:39, 30.22s/epoch, optim=AdamJan, lr=0, loss=0.1994, train-accuracy=0.9304, test-accuracy=0.8515]CIFAR
+Training Progress:  46%|████▋     | 37/80 [19:20<21:39, 30.22s/epoch, optim=AdamJan, lr=0, loss=0.1889, train-accuracy=0.9342, test-accuracy=0.8014]Training Progress:  48%|████▊     | 38/80 [19:20<21:13, 30.32s/epoch, optim=AdamJan, lr=0, loss=0.1889, train-accuracy=0.9342, test-accuracy=0.8014]CIFAR
+Training Progress:  48%|████▊     | 38/80 [19:50<21:13, 30.32s/epoch, optim=AdamJan, lr=0, loss=0.1863, train-accuracy=0.9336, test-accuracy=0.8258]Training Progress:  49%|████▉     | 39/80 [19:50<20:43, 30.33s/epoch, optim=AdamJan, lr=0, loss=0.1863, train-accuracy=0.9336, test-accuracy=0.8258]CIFAR
+slurmstepd: error: *** JOB 120320 ON node-01 CANCELLED AT 2024-09-07T20:46:20 ***

@@ -4,7 +4,7 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
 
-optimizers = ["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
+optimizers =["SGD","Adam","AdamW","AdaBelief","Apollo","ApolloW","AdaHessian"] #["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
 
 def eval_kpis_mean():
     runs_to_include = ['tinyimagenet-cosine']
@@ -40,7 +40,7 @@ def eval_kpis():
     cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
     cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
     rows = []
-    run = "second_order_best"
+    run = "second-order-best"
 
     for optim in optimizers:
         row = [optim]
@@ -48,10 +48,16 @@ def eval_kpis():
             print(f"./results/{set}/{run}/{optim}/benchmark.json")
             state = BenchmarkState(f"./results/{set}/{run}/{optim}/benchmark.json")
             sgd_state = BenchmarkState(f"./results/{set}/{run}/SGD/benchmark.json")
-            PostProcessor(state) 
             state = {key :np.array(state[key]) for key in state.dump().keys()}
             sgd_state = {key :np.array(sgd_state[key]) for key in sgd_state.dump().keys()}
- 
+
+            min_length_tps = min(len(state['tps']), len(sgd_state['tps']))
+            min_length_mem = min(len(state['gpu_mem']), len(sgd_state['gpu_mem']))
+
+            state['tps'], sgd_state['tps'] = state['tps'][:min_length_tps], sgd_state['tps'][:min_length_tps]
+           # print("SGD", sgd_state['gpu_mem'],optim,state['gpu_mem'])
+            state['gpu_mem'], sgd_state['gpu_mem'] = state['gpu_mem'][:min_length_mem], sgd_state['gpu_mem'][:min_length_mem]
+
             speed_x, speed_x_std = np.mean(state['tps'] / sgd_state['tps']), np.std(state['tps'] / sgd_state['tps'])
             mem_x, mem_x_std = np.mean(state['gpu_mem'] / sgd_state['gpu_mem']), np.std(state['gpu_mem'] / sgd_state['gpu_mem'])
 
@@ -110,5 +116,5 @@ def eval_convergence():
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_convergence()
+eval_kpis()
 #print(eval_kpis())

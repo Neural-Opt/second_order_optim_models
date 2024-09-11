@@ -8,9 +8,10 @@ from utils.utils import BenchmarkAnalyzer
 
 class Plotter():
     def __init__(self, optimizers, data) -> None:
-        self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 12))
+        self.fig, self.axs = plt.subplots(1, 2, figsize=(12, 6))
         self.data = data
-      
+        self.reducer = lambda x:  x
+
         self.optimizers = optimizers
 
     def plot(self, metric, title, subplot_idx):
@@ -20,9 +21,13 @@ class Plotter():
 
         if kpi['plot'] == "graph":
             for optim in self.optimizers:
-                data = self.data[optim][metric]
+                data = self.reducer(self.data[optim][metric])
                 ax.plot(np.arange(len(data)), data, label=optim)
-            ax.set_xlabel('Epochs')
+            if metric == "bleu":
+                ax.set_xlabel('Epochs')
+            else:
+                ax.set_xlabel('Updates')
+                
 
         elif kpi['plot'] == 'box':
             box_data = [self.data[optim][metric] for optim in self.optimizers]
@@ -37,26 +42,31 @@ class Plotter():
         ax.set_title(title)
 
 run = 1
-optim = ["Adam","AdaBelief","Apollo"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
-path = "./runs/cifar10-hessian-approx/1"
+optim = ["AdamW","Adam","AdaBelief","Apollo","ApolloW","AdaHessian","SGD"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
+path = "./results/wmt14"
 l = Logger(rank="cuda", world_size=1, base_path=path)
 data = l.getData()
 print(data.keys(),)
 #[PostProcessor(data[opt]) for opt in optim]
 
 p = Plotter(optim, data)
-metrics = metrics = ["cosine_sim", "nmse"]
+metrics =["train_loss","bleu"] #["acc_train", "acc_test", "train_loss", "test_loss",]#["acc_train", "acc_test", "train_loss", "test_loss",] #["gpu_mem", "tps"] 
 #metrics = ["acc_train", "acc_test", "train_loss", "test_loss",]#["acc_train", "acc_test", "train_loss", "test_loss",] #["gpu_mem", "tps"] #
 #metrics = ["gpu_mem", "tps"]
 
 #titles =["Training Accuracy (milestone)", "Test Accuracy (milestone)", "Train Loss (milestone)","Test Loss (milestone)"]
 #["Training Accuracy (milestone)", "Test Accuracy (milestone)", "Train Loss (milestone)","Test Loss (milestone)"]# ["GPU Memory (MiB) (milestone)", "Time per step (TPS) (milestone)"]#
-titles = ["COSINE SIM", "NMSE"]
+titles = ["Log loss", "BLEU Score"]
 
 # Dictionary to track unique legend entries
 legend_entries = {}
 
 for idx, (metric, title) in enumerate(zip(metrics, titles)):
+    if metric == "train_loss":
+        p.reducer = (lambda x:  np.log(np.array(x)))
+    else:
+        p.reducer = (lambda x:  x)
+
     p.plot(metric, title, idx)
     # Collect handles and labels from the current axis
     handles, labels = p.axs.flat[idx].get_legend_handles_labels()
@@ -69,6 +79,6 @@ fig = p.fig
 print(legend_entries.keys())
 fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=2)
 
-plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
-plt.savefig('result_hessian_approx.png')
+plt.tight_layout(rect=[0, 0, 1, 0.9])  # Adjust the layout to make space for the legend
+plt.savefig('wmt14.png')
 plt.show()
