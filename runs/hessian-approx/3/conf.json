@@ -1,13 +1,13 @@
 {
     "runs": {
-        "epochs": 8,
-        "name": "wmt14",
+        "epochs": 30,
+        "name": "cifar10-cosine",
         "dir": "./runs",
         "lr_schedule_per_epoch": true
     },
     "dataset": {
-        "name": "wmt14",
-        "path": "./data/wmt14"
+        "name": "cifar10-cosine",
+        "path": "./data/cifar10-cosine"
     },
     "kpi": [
         {
@@ -51,22 +51,30 @@
             "unit": "MB",
             "fqn": "GPU Memory usage",
             "plot": "box"
+        },
+        {
+            "name": "bleu",
+            "unit": "",
+            "fqn": "BLEU Score",
+            "plot": "graph"
         }
     ],
     "lr_scheduler": {
-        "type": "-"
+        "type": "CosineAnnealingLR",
+        "params": {
+            "T_max": 200
+        }
     },
     "optim": {
         "Apollo": {
             "name": "Apollo",
             "params": {
                 "init_lr": "None",
-                "lr": 0.04,
-                "eps": 0.0001,
+                "lr": 0.01,
                 "beta": 0.9,
-                "warmup": 0,
+                "warmup": 500,
                 "weight_decay_type": "L2",
-                "weight_decay": 0,
+                "weight_decay": 0.00025,
                 "rebound": "constant"
             }
         },
@@ -75,7 +83,6 @@
             "params": {
                 "init_lr": "None",
                 "lr": 0.01,
-                "eps": 0.0001,
                 "beta": 0.9,
                 "warmup": 500,
                 "weight_decay_type": "decoupled",
@@ -83,20 +90,30 @@
                 "rebound": "constant"
             }
         },
+        "AdaHessian": {
+            "name": "AdaHessian",
+            "params": {
+                "lr": 0.15,
+                "beta1": 0.9,
+                "beta2": 0.999,
+                "weight_decay": 0.001,
+                "warmup": 500
+            }
+        },
         "Adam": {
             "name": "Adam",
             "params": {
-                "lr": 0.0005,
+                "lr": 0.001,
                 "beta1": 0.9,
-                "beta2": 0.98,
+                "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0
+                "weight_decay": 0.00025
             }
         },
         "AdamJan": {
             "name": "AdamJan",
             "params": {
-                "lr": 0.0005,
+                "lr": 0.0003,
                 "beta1": 0.9,
                 "beta2": 0.98,
                 "eps": 1e-08,
@@ -104,35 +121,25 @@
                 "weight_decouple": true
             }
         },
-        "AdaHessian": {
-            "name": "AdaHessian",
+        "AdamW": {
+            "name": "Adam",
             "params": {
-                "lr": 0.1,
+                "lr": 0.001,
                 "beta1": 0.9,
-                "beta2": 0.98,
-                "eps": 0.01,
-                "weight_decay": 0,
-                "warmup": 0
+                "beta2": 0.999,
+                "eps": 1e-08,
+                "weight_decay": 0.025,
+                "weight_decouple": true
             }
         },
         "AdaBelief": {
             "name": "AdaBelief",
             "params": {
-                "lr": 0.0005,
+                "lr": 0.001,
                 "beta1": 0.9,
-                "beta2": 0.98,
+                "beta2": 0.999,
                 "eps": 1e-08,
-                "weight_decay": 0
-            }
-        },
-        "AdamW": {
-            "name": "Adam",
-            "params": {
-                "lr": 0.0005,
-                "beta1": 0.9,
-                "beta2": 0.98,
-                "eps": 1e-08,
-                "weight_decay": 0,
+                "weight_decay": 0.00025,
                 "weight_decouple": true
             }
         },
@@ -149,7 +156,7 @@
             "name": "SGD",
             "params": {
                 "lr": 0.1,
-                "momentum": 0,
+                "momentum": 0.9,
                 "weight_decay": 0.00025
             }
         }

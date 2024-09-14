@@ -34,7 +34,7 @@ class Logger:
         output = {}
         
         for d in os.listdir(self.base_path):
-            if d == "conf.json" or d == "result_plot.png":
+            if d == "conf.json" or d == "readme"or d == "result_plot.png":
                 continue
             state = BenchmarkState(f"{os.path.join(self.base_path, d)}/benchmark.json")
             state.load()
@@ -49,7 +49,7 @@ class Logger:
     
     def save(self,optim):
         optim_data = self.gatherGPUData(self.benchmarkState.dump())
-        if (self.rank == 0 or self.rank == "cuda") and len(optim_data) != 0:
+        if len(optim_data) != 0:
                 os.makedirs(f"{ self.base_path}/{optim}")
                 with open(f"{self.base_path}/{optim}/benchmark.json", 'wb') as file:
                     pickle.dump(optim_data, file)
@@ -60,6 +60,8 @@ class Logger:
     """This is necessary if DDP is used. Due to the nature of AdaHessian, we have to use DP which makes this function
         obsolete. If AdaHessian is not required and DDP is used, use this"""
     def gatherGPUData(self,data):
+        return data
+        print(self.rank)
         if self.rank == "cuda":
             return data
         dist.barrier()

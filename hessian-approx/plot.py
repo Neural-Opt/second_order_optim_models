@@ -10,6 +10,8 @@ from config.loader import getConfig
 from log.Logger import Logger
 from utils.utils import BenchmarkAnalyzer
 
+def moving_average(data, window_size=10):
+    return np.convolve(data, np.ones(window_size)/window_size, mode='valid')
 class Plotter():
     def __init__(self, optimizers, data) -> None:
         self.fig, self.axs = plt.subplots(2, 2, figsize=(12, 12))
@@ -25,6 +27,7 @@ class Plotter():
         if plot_type == "graph":
             for optim in self.optimizers:
                 data = self.reducer(self.data[optim][metric])
+                print(torch.tensor(data).shape)
                 ax.plot(np.arange(len(data)), data, label=optim)
             ax.set_xlabel('Epochs')
 
@@ -75,22 +78,24 @@ class Plotter():
         ax.set_title(title)
 
 run = 1
-optim = ["AdaBelief","Adam","Apollo","AdaHessian"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
-path = "./results/hessian-approx/EMA"
+optim = ["AdamJan","AdaBelief"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
+path = "./runs/hessian-approx/22"
 l = Logger(rank="cuda", world_size=1, base_path=path)
 data = l.getData()
 p = Plotter(optim, data)
 #[PostProcessor(data[opt]) for opt in optim]
-metrics =['loss','test_loss']#["cosine_sim","cosine_sim","cosine_sim","cosine_sim"]
+metrics =['loss']#["cosine_deg","cosine_deg","cosine_deg","cosine_deg"]
 
 #print(data["Apollo"]["loss"])
-titles = ['loss','test_loss']#["cosine_sim_layer_0","cosine_sim_layer_1","cosine_sim_layer_2","cosine_sim_layer_3"]
+titles =['loss']#["cosine_sim_layer_0","cosine_sim_layer_1","cosine_sim_layer_2","cosine_sim_layer_3"]
 
 # Dictionary to track unique legend entries
 legend_entries = {}
 
 for idx, (metric, title) in enumerate(zip(metrics, titles)):
-   # p.setReducer(lambda x:  x[0][2*idx:2+2*idx])
+   # p.setReducer(lambda x:  (x[0][2*idx:2+2*idx][0]))
+
+    # p.setReducer(lambda x:  moving_average(np.array(x)))
     print(metric)
     p.plot(metric, title, idx,"graph")
     # Collect handles and labels from the current axis
