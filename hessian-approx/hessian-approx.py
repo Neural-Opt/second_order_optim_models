@@ -167,7 +167,7 @@ class Apollo(Optimizer):
                 ``'L2'`` | ``'decoupled'`` | ``'stable'`` (default: 'L2')
         """
 
-    def __init__(self, params,  lr=6e-3, beta=0.9, eps=1e-8, rebound='constant', warmup=0, init_lr=None, weight_decay=0, weight_decay_type=None):
+    def __init__(self, params,  lr=3e-3, beta=0.9, eps=1e-4, rebound='constant', warmup=0, init_lr=None, weight_decay=0, weight_decay_type=None):
         if not 0.0 < lr:
             raise ValueError("Invalid learning rate value: {}".format(lr))
         if not 0.0 <= eps:
@@ -503,7 +503,7 @@ class AdaDerivative(Optimizer):
         return loss
 
 
-class AdamJan(Optimizer):
+"""class AdamJan(Optimizer):
     def __init__(self, params, lr=0.01, beta1=0.9, beta2=0.999, eps=1e-8,weight_decouple=False,weight_decay=0):
         # Initialize the parameter groups and defaults
         defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps,weight_decouple=weight_decouple, weight_decay=weight_decay)
@@ -590,8 +590,109 @@ class AdamJan(Optimizer):
                 state['old_grad'] = grad
                 #self.compute_diagonal_hessian()
         return loss
+"""
+
+class AdamJan(Optimizer):
+    def __init__(self, params, lr=0.01, beta1=0.9, beta2=0.999, eps=1e-8,weight_decouple=False,weight_decay=0):
+        # Initialize the parameter groups and defaults
+        defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps,weight_decouple=weight_decouple, weight_decay=weight_decay)
+        print(defaults)
+        super(AdamJan, self).__init__(params, defaults)
+    
+    @torch.no_grad()
+    def step(self, hess_acc=None):
+        loss = None
+      
+        group = self.param_groups[0]
+
+        # Iterate over each parameter group
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is None:
+                    continue
+                grad = p.grad.data
+                if grad.is_sparse:
+                    raise RuntimeError('AdamJan does not support sparse gradients')
+
+                state = self.state[p]
+
+                # State initialization
+                if len(state) == 0:
+                    state['step'] = 0
+                    state['exp_avg'] = torch.zeros_like(p.data)
+                    state['exp_avg_sq'] = torch.zeros_like(p.data)
+                    state['ema_param_delta'] = torch.zeros_like(p.data)
+
+                    state['exp_var'] = torch.zeros_like(p.data)
+                    state['old_grad'] = torch.zeros_like(p.data)
+                    state['old_param'] = torch.zeros_like(p.data)
+                    state['mean_change_p'] = torch.ones_like(p.data)
+                    state['mean_change_g'] = torch.ones_like(p.data)
 
 
+
+                exp_avg, exp_avg_sq,ema_param_delta, mean_change_p,mean_change_g = state['exp_avg'], state['exp_avg_sq'],state['ema_param_delta'],state['mean_change_p'],state['mean_change_g']
+
+
+                beta1=group['beta1']
+                beta2=group['beta2']
+
+                state['step'] += 1
+                bias_correction1 = (1 - beta1 ** state['step'])
+                bias_correction2 =  (1 - beta2 ** state['step']) ** 0.5 
+               # delta = torch.abs(p - state['old_param']  )
+          
+                exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
+
+                grad_diff = (grad - state['old_grad'] )
+                
+                exp_avg_sq.mul_(beta2).addcmul_(grad_diff, grad_diff, value=1 - beta2)
+
+                p_delta = torch.abs(p-state['old_param'] )
+               # p_delta = torch.abs(p - (state['old_param'] ))
+               # ema_param_delta.mul_(beta2).add_((p_delta), alpha=1 - beta2)
+
+                alpha  = torch.abs(p-state['old_param'] )
+                beta  = torch.abs(grad- state['old_grad']  )
+
+                mean_change_p.mul_(beta1).add_(alpha, alpha=1 - beta1)
+                mean_change_g.mul_(beta1).add_(beta, alpha=1 - beta1)
+
+                phi = torch.abs(mean_change_g - beta)  / (torch.abs(mean_change_p - alpha) + 1e-4)
+
+
+
+                #print(torch.log1p(beta/(alpha+1e-8)).flatten())
+              #  alpha = torch.abs(p_delta / (ema_param_delta/bias_correction2 + 1e-8) - 1)
+             #   beta =  torch.abs(grad_diff**2 / (exp_avg_sq/bias_correction2 + 1e-8) - 1)
+                gamma = torch.clamp(phi, min=0.5, max=1.5)
+               # print(gamma)
+               # gamma = torch.clamp(torch.log1p(beta/(alpha+1e-8)), min=0.8, max=1.2)#torch.log1p(beta/(alpha+1e-8))
+
+
+                #print(beta.flatten()[:10])
+                #print(alpha.flatten()[:10])
+               # print(((beta/(alpha))).flatten()[:10])
+
+              #  print(torch.log1p((beta/(alpha+1e-8))).flatten()[:10])
+             #   print("___________________")
+
+                #print(torch.exp(-(torch.abs(p-state['old_param']))))
+
+
+
+                denom = ((exp_avg_sq).sqrt()/ bias_correction2 * gamma ).add_(group['eps'])
+                hess_acc.storeApproximation(p,denom.clone().detach())
+
+               # print((exp_avg_sq).sqrt()/ bias_correction2)
+               # print((exp_avg_sq).sqrt()/ bias_correction2)
+
+                step_size = group['lr'] / bias_correction1
+                state['old_param'] = p.clone().detach()
+                p.data.addcdiv_(exp_avg, denom, value=-step_size)
+                state['old_grad'] = grad.detach()
+                #self.compute_diagonal_hessian()
+        return loss
 import torch
 from torch.optim.optimizer import Optimizer
 import torch.distributed as dist
@@ -614,9 +715,9 @@ class AdaHessian(Optimizer):
         num_threads (int, optional) -- number of threads for distributed training (default: 1)
     """
 
-    def __init__(self, params, lr=0.2,beta1=0.9,beta2=0.999 , eps=1e-4, weight_decay=0.0,
+    def __init__(self, params, lr=0.20,beta1=0.9,beta2=0.999 , eps=1e-4, weight_decay=0.0,
                  warmup=0, init_lr=0.0, hessian_power=1.0, update_each=1,
-                 num_threads=1, average_conv_kernel=True):
+                 num_threads=1, average_conv_kernel=False):
         if not 0.0 <= lr:
             raise ValueError(f"Invalid learning rate: {lr}")
         if not 0.0 <= eps:
@@ -764,9 +865,14 @@ class HessianAccumulator:
         self.layerCosineSim = []
         self.layerDegree= []
 
-        self.layerMean = []
+        self.layerMAE = []
         self.firstParamState={}
         self.lastParamState={}
+        self.firstParams =  (parameters_to_vector(self.model.parameters()))
+        self.currentParams_t = torch.zeros_like(parameters_to_vector(self.model.parameters()))
+        self.pastParams_one =  torch.zeros_like(parameters_to_vector(self.model.parameters()))
+        self.pastParams_two =  torch.zeros_like(parameters_to_vector(self.model.parameters()))
+        
 
     def calcHessianDiagonal(self,loss,averageHessian=False):
         for param in self.model.parameters():
@@ -786,7 +892,19 @@ class HessianAccumulator:
                     self.state[param][0].mul_(0.999).add_(torch.tensor(hessian_diag).to(device), alpha=1 - 0.999)
                 else:
                     self.state[param][0] = torch.tensor(hessian_diag).to(device)
-    
+        return self.state
+    def measure_curvature(self,benchmark,loss,averageHessian=False):
+        state_dict = self.calcHessianDiagonal(loss,averageHessian=False)
+        hess = []
+        for dic in state_dict.values():
+            hess.append(dic[0])
+        hess = torch.cat(hess)
+        curvature_magnitudes = torch.abs(hess)
+       # print(torch.sum(curvature_magnitudes))
+        benchmark.add("abs_curv", torch.mean(curvature_magnitudes).item())
+
+        return curvature_magnitudes
+
 
 
     def calcHessianFull(self,model,images,labels):
@@ -854,24 +972,46 @@ class HessianAccumulator:
         else:
             self.state[param][1] = approx
 
+    def calcBehavior(self,benchmark):
+        self.pastParams_two =  self.pastParams_one
+        self.pastParams_one =  self.currentParams_t
+        self.currentParams_t = parameters_to_vector(self.model.parameters())
+        print(self.currentParams_t.shape)
+        step_size = torch.norm(  self.currentParams_t -  self.pastParams_one )
+        travel_dist = torch.norm(  self.firstParams- self.currentParams_t )
+
+        pastStep=  self.pastParams_one -   self.pastParams_two
+        currStep =  self.currentParams_t -   self.pastParams_one
+        cos_sim = torch.nn.functional.cosine_similarity(pastStep, currStep, dim=0).item()
+
+        benchmark.add("step_size",step_size.item())
+        benchmark.add("travel_dist",travel_dist.item())
+        benchmark.add("update_angle", math.acos(cos_sim))
+
+
+
+
+
     def calcHessianApproxQuality(self):
      
         for i, hessian_approx in  enumerate(self.state.values()):
             self.layerCosineSim =  self.layerCosineSim  + [[]] if  len(self.layerCosineSim) - 1 < i else  self.layerCosineSim
             self.layerDegree =  self.layerDegree  + [[]] if  len(self.layerDegree) - 1 < i else  self.layerDegree
-
-            self.layerMean =  self.layerMean  + [[]] if  len(self.layerMean) - 1 < i else  self.layerMean
+            self.layerMAE =  self.layerMAE  + [[]] if  len(self.layerMAE) - 1 < i else  self.layerMAE
 
             hessian_flat = torch.abs(hessian_approx[0].view(-1))
             approx_flat =  torch.abs(hessian_approx[1].view(-1))
 
             cos_sim = torch.nn.functional.cosine_similarity(hessian_flat, approx_flat, dim=0)
             mean = torch.mean(torch.abs(approx_flat))
+            abs_diff = torch.abs(hessian_flat - approx_flat)
+            mean_abs_error = torch.mean(abs_diff)
+
             #benchmark.add("cosine_sim",cos_sim.item())
             #benchmark.add("nmse",nmse.item())
             self.layerCosineSim[i].append((cos_sim.item()))
             self.layerDegree[i].append(math.degrees(math.acos(cos_sim.item())))
-            self.layerMean[i].append(mean.item())
+            self.layerMAE[i].append(mean_abs_error.item())
             #print(f"Cosine Similarity: {cos_sim.item()}")
             #print(f"NMSE: {nmse.item()}")
 """
@@ -937,10 +1077,10 @@ def train(optim):
     train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
     test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=124, shuffle=True)
-    test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=124, shuffle=False)
+    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=1048, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=1048, shuffle=False)
 
-    num_epochs = 3
+    num_epochs = 4
 
     epoch_bar = tqdm(total=num_epochs, desc='Training Progress', unit='epoch')
     # Instanziiere das Modell und verschiebe es auf das Gerät
@@ -953,7 +1093,6 @@ def train(optim):
     model.train()
     print(sum(p.numel() for p in model.parameters() if p.requires_grad))
     ha = HessianAccumulator(model)
-    paramsBefore = parameters_to_vector(model.parameters())
 
     for epoch in range(num_epochs):
         model.train()
@@ -970,7 +1109,8 @@ def train(optim):
             outputs = model(images)
             loss = criterion(outputs,labels)
          
-          #  ha.calcHessianDiagonal(loss,averageHessian=False)
+            ha.calcBehavior(benchmark)
+            ha.measure_curvature(benchmark,loss,averageHessian=False)
               # Clear gradients before the backward pass
             model.zero_grad()
             
@@ -984,13 +1124,12 @@ def train(optim):
         test_loss = evaluate_test_loss(model, test_loader, criterion)
         benchmark.add("test_loss", test_loss)
 
-    paramsAfter = parameters_to_vector(model.parameters())
 
     #print(optim, "TravelDistance",torch.norm(paramsAfter-paramsBefore))
     benchmark.add("cosine_sim",ha.layerCosineSim)
     benchmark.add("cosine_deg",ha.layerDegree)
 
-    benchmark.add("mean",ha.layerMean)
+    benchmark.add("mae",ha.layerMAE)
 
 conf = getConfig()
 world_size = torch.cuda.device_count()
@@ -998,9 +1137,11 @@ base_path = createNewRun(f"./runs/hessian-approx")
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         
-optims = ["AdamJan","AdaBelief"]
+optims = ["Adam","AdaHessian","Apollo","AdaBelief","AdaDerivative"]
 logger = Logger(base_path=base_path,rank=device,world_size=world_size)
 for optim in optims:
+
+    print(optim)
     set_seed(404)
     logger.setup(optim=optim)
     train(optim)
