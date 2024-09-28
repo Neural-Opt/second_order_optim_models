@@ -4,7 +4,7 @@ from utils.utils import BenchmarkAnalyzer
 from visualize.table import makeTable, print_table 
 import numpy as np
 
-optimizers =["SGD","Adam","AdamW","AdaBelief","Apollo","ApolloW","AdaHessian"] #["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
+optimizers =["SGD","Adam","AdamW","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"] #["AdaBelief","AdaHessian","Adam","AdamW","Apollo","ApolloW","RMSprop","SGD"]
 
 def eval_kpis_mean():
     runs_to_include = ['tinyimagenet-cosine']
@@ -36,11 +36,11 @@ def eval_kpis_mean():
         rows.append(row)
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_kpis():
-    runs_to_include = ['cifar10-steplr']
+    runs_to_include = ['wmt14']
     cols = [" "]+[f"{k} - Speed (TPS)"for k in runs_to_include]
     cols += ([f"{k} - Memory (GPU)" for k in runs_to_include])
     rows = []
-    run = "second-order-best"
+    run = "."
 
     for optim in optimizers:
         row = [optim]
@@ -48,6 +48,8 @@ def eval_kpis():
             print(f"./results/{set}/{run}/{optim}/benchmark.json")
             state = BenchmarkState(f"./results/{set}/{run}/{optim}/benchmark.json")
             sgd_state = BenchmarkState(f"./results/{set}/{run}/SGD/benchmark.json")
+          #  print(optim)
+           # print(state.dump())
             state = {key :np.array(state[key]) for key in state.dump().keys()}
             sgd_state = {key :np.array(sgd_state[key]) for key in sgd_state.dump().keys()}
 
@@ -68,7 +70,7 @@ def eval_kpis():
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 def eval_acc_mean():
-    runs_to_include = ['cifar10-steplr']
+    runs_to_include = ['cifar10-step-lr/second-order-best']
     cols = [" "]+[f"{k} - Accuracy"for k in runs_to_include]
     rows = []
     for optim in optimizers:
@@ -76,17 +78,17 @@ def eval_acc_mean():
         for set in runs_to_include:
             state = BenchmarkAnalyzer.getConcatStates(set,optim,reducer=lambda x: x[:,x.shape[1] - 1:])
             accs = (state['acc_test']).reshape(1,-1)
+            print(accs)
             acc_mean, acc_sgd = np.mean(accs), np.std(accs)
-
-            row.append(f"{round(acc_mean,4)} ± {round(acc_sgd,3)}")
+            row.append(f"{round(acc_mean,4)} ± {round(acc_sgd,4)}")
         rows.append(row)
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_acc():
-    runs_to_include = ['cifar10-steplr']
+    runs_to_include = ['tinyimagenet-cosine']
     cols = [" "]+[f"{k} - Accuracy"for k in runs_to_include]
     rows = []
-    run = "second_order_best"
+    run = "second-order-best"
     for optim in optimizers:
         row = [optim]
         for set in runs_to_include:
@@ -103,18 +105,19 @@ def eval_convergence():
     runs_to_include = ['tinyimagenet-cosine']
     cols = [" "]+[f"{k} - TTC"for k in runs_to_include]
     rows = []
+    run = "second-order-best"
+
     for optim in optimizers:
         row = [optim]
-        run="second-order-best"
         for set in runs_to_include:
             state = BenchmarkAnalyzer.getConcatStates(set,optim,run=run)
             ttcs = (state['ttc']).reshape(1,-1)
             ttc_mean, ttc_sgd = np.mean(ttcs), np.std(ttcs)
-            row.append(f"{round( ttc_mean,4)} ± {round(ttc_sgd,3)}")
+            row.append(f"{round( ttc_mean,0)} ± {round(ttc_sgd,0)}")
         rows.append(row)
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_kpis()
+eval_convergence()
 #print(eval_kpis())

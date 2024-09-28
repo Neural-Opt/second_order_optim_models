@@ -49,13 +49,15 @@ a == [[q],[b]]
 class BenchmarkAnalyzer:
     @staticmethod
     def getRunCount(dir):
-        return 1#sum(os.path.isdir(os.path.join(f"./runs/{dir}", d)) for d in os.listdir(f"./runs/{dir}")) 
+        return sum(os.path.isdir(os.path.join(f"./results/{dir}", d)) for d in os.listdir(f"./results/{dir}")) 
     @staticmethod
     def getAllData(dir,dirCount,optim,join=False):
         state_collector = BenchmarkState(f"./results/{dir}/{dirCount}/{optim}/benchmark.json").dump()
         state_collector = {key: [] for key in state_collector}
         state_collector["ttc"] = []
         for i in range(1,dirCount+1):
+            print(f"./results/{dir}/{i}/{optim}/benchmark.json")
+
             state = BenchmarkState(f"./results/{dir}/{i}/{optim}/benchmark.json")
             PostProcessor(state)        
             for key in state.dump().keys():
@@ -66,13 +68,15 @@ class BenchmarkAnalyzer:
         return {key: np.array(state_collector[key]) for key in state_collector}
     staticmethod
     def getConcatStates(setName,optim,run=-1,reducer=lambda x:x):
-        print(f"./results/{setName}/{run}/{optim}/benchmark.json")
         if run==-1:
             concat = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim)
         else:
+            print(f"./results/{setName}/{run}/{optim}/benchmark.json")
             concat = BenchmarkState(f"./results/{setName}/{run}/{optim}/benchmark.json")
             PostProcessor(concat)     
             concat = {key : np.array(concat[key]) for key in concat.dump().keys()}
+      
+       
         for key in concat.keys():
             concat[key] =  reducer(concat[key])
        

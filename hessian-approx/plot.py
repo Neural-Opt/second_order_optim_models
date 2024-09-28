@@ -27,9 +27,9 @@ class Plotter():
         if plot_type == "graph":
             for optim in self.optimizers:
                 data = self.reducer(self.data[optim][metric])
-                print(torch.tensor(data).shape)
+                print(optim,torch.tensor(data).shape)
                 ax.plot(np.arange(len(data)), data, label=optim)
-            ax.set_xlabel('Epochs')
+                ax.set_ylabel('PHIO')
 
         elif plot_type == 'box':
             box_data = []
@@ -78,24 +78,24 @@ class Plotter():
         ax.set_title(title)
 
 run = 1
-optim = ["AdamJan","AdaBelief"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
-path = "./runs/hessian-approx/22"
+optim = ["AdaHutch","AdaBelief","Adam","AdaHessian"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
+path = "./runs/hessian-approx/20"
 l = Logger(rank="cuda", world_size=1, base_path=path)
 data = l.getData()
 p = Plotter(optim, data)
 #[PostProcessor(data[opt]) for opt in optim]
-metrics =['loss']#["cosine_deg","cosine_deg","cosine_deg","cosine_deg"]
+metrics =["cosine_deg","cosine_deg","cosine_deg","cosine_deg"]
 
 #print(data["Apollo"]["loss"])
-titles =['loss']#["cosine_sim_layer_0","cosine_sim_layer_1","cosine_sim_layer_2","cosine_sim_layer_3"]
+titles =["conv_layer_0","conv_layer_1","fc_layer_0","fc_layer_1"]
 
 # Dictionary to track unique legend entries
 legend_entries = {}
 
 for idx, (metric, title) in enumerate(zip(metrics, titles)):
-   # p.setReducer(lambda x:  (x[0][2*idx:2+2*idx][0]))
+    p.setReducer(lambda x: (x[0][2*idx:2+2*idx][0]))
 
-    # p.setReducer(lambda x:  moving_average(np.array(x)))
+   # p.setReducer(lambda x:  np.log((np.array(x))))
     print(metric)
     p.plot(metric, title, idx,"graph")
     # Collect handles and labels from the current axis
@@ -109,5 +109,8 @@ fig = p.fig
 fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=2)
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
-plt.savefig('./hessian-approx/loss.png')
-plt.show()
+plt.savefig('./results/hessian-approx/1028/cosine-sim/losses.png')
+import tikzplotlib
+
+#tikzplotlib.save("./results/hessian-approx/128/cosine-sim/bias-sim.tex")
+#plt.show()

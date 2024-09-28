@@ -28,6 +28,8 @@ def set_seed(seed):
         torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
+
+   
 class Adam(Optimizer):
 
     def __init__(self, params, lr=1e-2, beta1=0.9, beta2=0.999, eps=1e-8,weight_decouple=False,weight_decay=0):
@@ -99,7 +101,7 @@ class Adam(Optimizer):
         #benchmark.add("cosine_sim",cos_sim.item())
         #benchmark.add("nmse",nmse.item())
 class AdaBelief(Optimizer):
-    def __init__(self, params, lr=1e-2, beta1=0.9,beta2=0.999, eps=1e-8, weight_decay=0, weight_decouple=False, fixed_decay=False, amsgrad=False):
+    def __init__(self, params, lr=1e-2, beta1=0.9,beta2=0.999, eps=1e-8, weight_decay=0, weight_decouple=True, fixed_decay=False, amsgrad=False):
         defaults = dict(lr=lr, beta1=beta1, beta2=beta2, eps=eps, weight_decay=weight_decay, weight_decouple=weight_decouple, fixed_decay=fixed_decay, amsgrad=amsgrad)
         super(AdaBelief, self).__init__(params, defaults)
 
@@ -439,6 +441,169 @@ class SApollo(Optimizer):
                 p.add_(d_p, alpha=-curr_lr)
 
         return None
+
+class AdaHutch(Optimizer):
+    def __init__(self, params, lr=0.01, beta1=0.9,beta2=0.999, eps=1e-8, weight_decay=0, weight_decouple=True, fixed_decay=False, amsgrad=False):
+        defaults = dict(lr=lr, beta1=beta1, beta2=beta2, eps=eps, weight_decay=weight_decay, weight_decouple=weight_decouple, fixed_decay=fixed_decay, amsgrad=amsgrad)
+        print(defaults)
+        super(AdaHutch, self).__init__(params, defaults)
+
+    def getHessian(self,grad,old_grad, param,old_param):
+
+        sum_ = torch.zeros_like(grad)
+        n = 3
+
+        dX = param / old_param
+        dG = grad - old_grad
+       
+
+      #  z_vectors = torch.randint(0, 2, (n, *grad.size()), device=grad.device) * 2 - 1
+       
+
+        return  dG/dX
+
+
+    def step(self, hess_acc=None):
+        loss = None
+       
+
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is None:
+                    continue
+                grad = p.grad.data
+                if grad.is_sparse:
+                    raise RuntimeError('AdaBelief does not support sparse gradients')
+
+                state = self.state[p]
+
+                # State initialization
+                if len(state) == 0:
+                    state['step'] = 0
+                    state['exp_avg'] = torch.zeros_like(p.data)
+                    state['exp_avg_sq'] = torch.zeros_like(p.data)
+
+                    state['exp_hessian_diag_sq'] = torch.zeros_like(p.data)
+                    if group['amsgrad']:
+                        state['max_exp_avg_sq'] = torch.zeros_like(p.data)
+
+                exp_avg,exp_avg_sq ,exp_hessian_diag_sq = state['exp_avg'],state['exp_avg_sq'], state['exp_hessian_diag_sq']
+                beta1=group['beta1']
+                beta2=group['beta2']
+
+                state['step'] += 1
+
+                bias_correction1 = (1 - beta1 ** state['step'])
+                bias_correction2 =  (1 - beta2 ** state['step']) ** 0.5
+
+                if group['weight_decay'] != 0:
+                    if group['weight_decouple']:
+                        p.data.mul_(1.0 - group['lr'] * group['weight_decay'])
+                    else:
+                        grad = grad.add(p.data, alpha=group['weight_decay'])
+               
+                exp_avg_sq.mul_(beta1).addcmul_(grad,grad, value=1 - beta1)
+               
+                diff = (grad-exp_avg)
+                exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
+              #  diff = torch.where(torch.abs(diff) > grad,grad,diff)
+
+             
+
+                exp_hessian_diag_sq.mul_(beta2).addcmul_(diff,diff, value=1 - beta2)
+
+                bias_correction1 = (1 - beta1 ** state['step'])
+                bias_correction2 =  (1 - beta2 ** state['step']) ** 0.5
+
+                denom = (exp_hessian_diag_sq.sqrt().sqrt() / bias_correction2).add_(group['eps'])
+               
+
+                step_size = group['lr'] / bias_correction1
+                hess_acc.storeApproximation(p,denom.clone().detach())
+
+                p.data.addcdiv_(exp_avg, denom, value=-step_size)
+
+        return loss
+class AdamJan(Optimizer):
+    def __init__(self, params, lr=0.01, beta1=0.9, beta2=0.999, eps=1e-8,weight_decouple=True,weight_decay=0):
+        # Initialize the parameter groups and defaults
+        defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps,weight_decouple=weight_decouple, weight_decay=weight_decay)
+        print(defaults)
+        super(AdamJan, self).__init__(params, defaults)
+
+    @torch.no_grad()
+    def step(self,hess_acc=None):
+        loss = None
+
+        group = self.param_groups[0]
+
+        # Iterate over each parameter group
+        for group in self.param_groups:
+            for p in group['params']:
+                if p.grad is None:
+                    continue
+                grad = p.grad.data
+                if grad.is_sparse:
+                    raise RuntimeError('AdamJan does not support sparse gradients')
+
+                state = self.state[p]
+
+                # State initialization
+                if len(state) == 0:
+                    state['step'] = 0
+                    state['exp_avg'] = torch.zeros_like(p.data)
+                    state['exp_avg_sq'] = torch.zeros_like(p.data)
+                    state['old_grad'] = torch.zeros_like(p.data)
+
+                    state['exp_step_len'] = torch.ones_like(p.data,dtype=torch.float16)
+                    
+
+
+                exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
+                beta1=group['beta1']
+                beta2=group['beta2']
+
+            
+
+                state['step'] += 1
+                bias_correction1 = (1 - beta1 ** state['step'])
+                bias_correction2 =  (1 - beta2 ** state['step']) ** 0.5
+
+                step_perc = torch.abs(((exp_avg) / ((exp_avg_sq) + group['eps'])) / (state['exp_step_len'] + group['eps']))
+                state['exp_step_len'] =  state['exp_step_len'].mul_(beta1).add_(torch.abs((exp_avg)/(exp_avg_sq +group['eps'])), alpha=1 - beta1)
+
+                if group['weight_decay'] != 0:
+                    if group['weight_decouple']:
+                        p.data.mul_(1.0 - group['lr'] * group['weight_decay'])
+                    else:
+                        grad = grad.add(p.data, alpha=group['weight_decay'])
+
+                exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
+
+                step_perc = torch.where((step_perc >=0.1) & (step_perc <= 10), step_perc ,torch.ones_like(step_perc))
+
+
+
+                grad_diff = (grad - exp_avg)/ step_perc
+
+
+                #grad_diff = torch.where(curvature,grad_diff,grad_diff)
+               
+                exp_avg_sq.mul_(beta2).addcmul_(grad_diff , grad_diff, value=1 - beta2)
+
+                denom = (exp_avg_sq.sqrt()/ bias_correction2).add_(group['eps'])
+
+                step_size = group['lr'] / bias_correction1
+                hess_acc.storeApproximation(p,denom.clone().detach())
+
+                p.data.addcdiv_(exp_avg, denom, value=-step_size)
+                state['old_grad'] = grad.detach()
+                state['old_param'] = p.detach().clone()
+            
+
+                #self.compute_diagonal_hessian()
+        return loss
+
 import torch
 from torch.optim import Optimizer
 class AdaDerivative(Optimizer):
@@ -496,203 +661,14 @@ class AdaDerivative(Optimizer):
 
                 step_size = group['lr'] / bias_correction1
                 hess_acc.storeApproximation(p,denom.clone().detach())
-                state['old_param'] = p.clone()
+               # state['old_param'] = p.clone()
                 p.data.addcdiv_(exp_avg, denom, value=-step_size)
-                state['old_grad'] = grad
+                state['old_grad'] = grad.detach().clone()
                 #self.compute_diagonal_hessian()
         return loss
 
 
-"""class AdamJan(Optimizer):
-    def __init__(self, params, lr=0.01, beta1=0.9, beta2=0.999, eps=1e-8,weight_decouple=False,weight_decay=0):
-        # Initialize the parameter groups and defaults
-        defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps,weight_decouple=weight_decouple, weight_decay=weight_decay)
-        print(defaults)
-        super(AdamJan, self).__init__(params, defaults)
-    
-    @torch.no_grad()
-    def step(self, hess_acc):
-        loss = None
-      
-        group = self.param_groups[0]
 
-        # Iterate over each parameter group
-        for group in self.param_groups:
-            for p in group['params']:
-                if p.grad is None:
-                    continue
-                grad = p.grad.data
-                if grad.is_sparse:
-                    raise RuntimeError('AdamJan does not support sparse gradients')
-
-                state = self.state[p]
-
-                # State initialization
-                if len(state) == 0:
-                    state['step'] = 0
-                    state['exp_avg'] = torch.zeros_like(p.data)
-                    state['exp_avg_sq'] = torch.zeros_like(p.data)
-                    state['ema_param_delta'] = torch.zeros_like(p.data)
-
-                    state['exp_var'] = torch.zeros_like(p.data)
-                    state['old_grad'] = torch.zeros_like(p.data)
-                    state['old_param'] = torch.zeros_like(p.data)
-
-
-                exp_avg, exp_avg_sq,ema_param_delta = state['exp_avg'], state['exp_avg_sq'],state['ema_param_delta']
-                beta1=group['beta1']
-                beta2=group['beta2']
-
-                state['step'] += 1
-                bias_correction1 = (1 - beta1 ** state['step'])
-                bias_correction2 =  (1 - beta2 ** state['step']) ** 0.5 
-               # delta = torch.abs(p - state['old_param']  )
-          
-                exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
-
-                grad_diff = (grad -exp_avg)
-                
-                exp_avg_sq.mul_(beta2).addcmul_(grad_diff, grad_diff, value=1 - beta2)
-
-                #p_delta = torch.abs(p/(state['old_param'] +1e-8)  -1)
-                p_delta = torch.abs(p - (state['old_param'] ))
-                ema_param_delta.mul_(beta2).add_((p_delta), alpha=1 - beta2)
-
-             #   alpha  = p_delta
-              #  beta  = torch.abs(grad/(state['old_grad'] +1e-8) -1)
-
-                alpha = torch.abs(p_delta / (ema_param_delta/bias_correction2 + 1e-8) - 1)
-                beta =  torch.abs(grad_diff**2 / (exp_avg_sq/bias_correction2 + 1e-8) - 1)
-                #gamma = torch.clamp(torch.log1p(beta/(alpha+1e-8)), min=0.85, max=1.15)
-                
-                gamma = torch.clamp(torch.log1p(beta/(alpha+1e-8)), min=0.8, max=1.2)#torch.log1p(beta/(alpha+1e-8))
-
-
-                #print(beta.flatten()[:10])
-                #print(alpha.flatten()[:10])
-               # print(((beta/(alpha))).flatten()[:10])
-
-              #  print(torch.log1p((beta/(alpha+1e-8))).flatten()[:10])
-             #   print("___________________")
-
-                #print(torch.exp(-(torch.abs(p-state['old_param']))))
-
-
-
-                denom = ((exp_avg_sq).sqrt()/ bias_correction2 * gamma ).add_(group['eps'])
-               # print((exp_avg_sq).sqrt()/ bias_correction2)
-               # print((exp_avg_sq).sqrt()/ bias_correction2)
-
-                step_size = group['lr'] / bias_correction1
-                hess_acc.storeApproximation(p,denom.clone().detach())
-                state['old_param'] = p.clone()
-                p.data.addcdiv_(exp_avg, denom, value=-step_size)
-                state['old_grad'] = grad
-                #self.compute_diagonal_hessian()
-        return loss
-"""
-
-class AdamJan(Optimizer):
-    def __init__(self, params, lr=0.01, beta1=0.9, beta2=0.999, eps=1e-8,weight_decouple=False,weight_decay=0):
-        # Initialize the parameter groups and defaults
-        defaults = dict(lr=lr, beta1=beta1,beta2=beta2, eps=eps,weight_decouple=weight_decouple, weight_decay=weight_decay)
-        print(defaults)
-        super(AdamJan, self).__init__(params, defaults)
-    
-    @torch.no_grad()
-    def step(self, hess_acc=None):
-        loss = None
-      
-        group = self.param_groups[0]
-
-        # Iterate over each parameter group
-        for group in self.param_groups:
-            for p in group['params']:
-                if p.grad is None:
-                    continue
-                grad = p.grad.data
-                if grad.is_sparse:
-                    raise RuntimeError('AdamJan does not support sparse gradients')
-
-                state = self.state[p]
-
-                # State initialization
-                if len(state) == 0:
-                    state['step'] = 0
-                    state['exp_avg'] = torch.zeros_like(p.data)
-                    state['exp_avg_sq'] = torch.zeros_like(p.data)
-                    state['ema_param_delta'] = torch.zeros_like(p.data)
-
-                    state['exp_var'] = torch.zeros_like(p.data)
-                    state['old_grad'] = torch.zeros_like(p.data)
-                    state['old_param'] = torch.zeros_like(p.data)
-                    state['mean_change_p'] = torch.ones_like(p.data)
-                    state['mean_change_g'] = torch.ones_like(p.data)
-
-
-
-                exp_avg, exp_avg_sq,ema_param_delta, mean_change_p,mean_change_g = state['exp_avg'], state['exp_avg_sq'],state['ema_param_delta'],state['mean_change_p'],state['mean_change_g']
-
-
-                beta1=group['beta1']
-                beta2=group['beta2']
-
-                state['step'] += 1
-                bias_correction1 = (1 - beta1 ** state['step'])
-                bias_correction2 =  (1 - beta2 ** state['step']) ** 0.5 
-               # delta = torch.abs(p - state['old_param']  )
-          
-                exp_avg.mul_(beta1).add_(grad, alpha=1 - beta1)
-
-                grad_diff = (grad - state['old_grad'] )
-                
-                exp_avg_sq.mul_(beta2).addcmul_(grad_diff, grad_diff, value=1 - beta2)
-
-                p_delta = torch.abs(p-state['old_param'] )
-               # p_delta = torch.abs(p - (state['old_param'] ))
-               # ema_param_delta.mul_(beta2).add_((p_delta), alpha=1 - beta2)
-
-                alpha  = torch.abs(p-state['old_param'] )
-                beta  = torch.abs(grad- state['old_grad']  )
-
-                mean_change_p.mul_(beta1).add_(alpha, alpha=1 - beta1)
-                mean_change_g.mul_(beta1).add_(beta, alpha=1 - beta1)
-
-                phi = torch.abs(mean_change_g - beta)  / (torch.abs(mean_change_p - alpha) + 1e-4)
-
-
-
-                #print(torch.log1p(beta/(alpha+1e-8)).flatten())
-              #  alpha = torch.abs(p_delta / (ema_param_delta/bias_correction2 + 1e-8) - 1)
-             #   beta =  torch.abs(grad_diff**2 / (exp_avg_sq/bias_correction2 + 1e-8) - 1)
-                gamma = torch.clamp(phi, min=0.5, max=1.5)
-               # print(gamma)
-               # gamma = torch.clamp(torch.log1p(beta/(alpha+1e-8)), min=0.8, max=1.2)#torch.log1p(beta/(alpha+1e-8))
-
-
-                #print(beta.flatten()[:10])
-                #print(alpha.flatten()[:10])
-               # print(((beta/(alpha))).flatten()[:10])
-
-              #  print(torch.log1p((beta/(alpha+1e-8))).flatten()[:10])
-             #   print("___________________")
-
-                #print(torch.exp(-(torch.abs(p-state['old_param']))))
-
-
-
-                denom = ((exp_avg_sq).sqrt()/ bias_correction2 * gamma ).add_(group['eps'])
-                hess_acc.storeApproximation(p,denom.clone().detach())
-
-               # print((exp_avg_sq).sqrt()/ bias_correction2)
-               # print((exp_avg_sq).sqrt()/ bias_correction2)
-
-                step_size = group['lr'] / bias_correction1
-                state['old_param'] = p.clone().detach()
-                p.data.addcdiv_(exp_avg, denom, value=-step_size)
-                state['old_grad'] = grad.detach()
-                #self.compute_diagonal_hessian()
-        return loss
 import torch
 from torch.optim.optimizer import Optimizer
 import torch.distributed as dist
@@ -1077,10 +1053,10 @@ def train(optim):
     train_dataset = datasets.MNIST(root='./data', train=True, download=True, transform=transform)
     test_dataset = datasets.MNIST(root='./data', train=False, download=True, transform=transform)
 
-    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=1048, shuffle=True)
-    test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=1048, shuffle=False)
+    train_loader = torch.utils.data.DataLoader(dataset=train_dataset, batch_size=1028, shuffle=True)
+    test_loader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=1028, shuffle=False)
 
-    num_epochs = 4
+    num_epochs = 3
 
     epoch_bar = tqdm(total=num_epochs, desc='Training Progress', unit='epoch')
     # Instanziiere das Modell und verschiebe es auf das Gerät
@@ -1102,27 +1078,30 @@ def train(optim):
             images, labels = images.to(device), labels.to(device)
 
             model.zero_grad()
-            #ha.calcHessianFull(model,images,labels)
+           
+           # ha.calcHessianFull(model,images,labels)
            # loss = calc_loss(images,labels,params_vector)
             #hessian(calc_loss,params_vector)
             
             outputs = model(images)
             loss = criterion(outputs,labels)
          
-            ha.calcBehavior(benchmark)
-            ha.measure_curvature(benchmark,loss,averageHessian=False)
+            #ha.calcBehavior(benchmark)
+           #
+            ha.calcHessianDiagonal(loss,averageHessian=False)
               # Clear gradients before the backward pass
             model.zero_grad()
             
             loss.backward(create_graph=(optim=="AdaHessian"))  # Normal backward pass
             optimizer.step(ha)  # Update model parameters
-          #  ha.calcHessianApproxQuality()
+         #
+            ha.calcHessianApproxQuality()
             epoch_bar.set_postfix({'loss': f'{loss.item():.4f}'})
             epoch_bar.update(1.0/len(train_loader))
             benchmark.add("loss",loss.item())
             
-        test_loss = evaluate_test_loss(model, test_loader, criterion)
-        benchmark.add("test_loss", test_loss)
+            test_loss = evaluate_test_loss(model, test_loader, criterion)
+            benchmark.add("test_loss", test_loss)
 
 
     #print(optim, "TravelDistance",torch.norm(paramsAfter-paramsBefore))
@@ -1137,7 +1116,7 @@ base_path = createNewRun(f"./runs/hessian-approx")
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
         
-optims = ["Adam","AdaHessian","Apollo","AdaBelief","AdaDerivative"]
+optims = ["AdaHutch"]
 logger = Logger(base_path=base_path,rank=device,world_size=world_size)
 for optim in optims:
 

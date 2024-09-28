@@ -4,21 +4,21 @@ import numpy as np
 class PostProcessor:
     def __init__(self,state:BenchmarkState) -> None:
         self.state = state
+        print(self.state.dump().keys())
         self.calcTTC()
     def calcTTC(self):
         data = self.state['train_loss']
-        ref = data[0] / 100
+        ref = data[0]/100
        # diff = np.diff(data)
         #std = np.std(diff)
-       
-        for i in range(len(data)-1,0,-1):
-            min, max = np.min(data[i:len(data)]), np.max(data[i:len(data)])
-            if abs(max-min) < ref:
+        sigma = 5
+        print(data[0]/100,data[107:])
+        old_mean = np.mean(data[len(data)-sigma:])
+        for i in range(len(data)-sigma,0,-1):
+            new_mean = np.mean(data[i:i+sigma])
+            if abs(new_mean-old_mean) < ref:
                 continue
-            elif i > 0:
-                self.state["ttc"]=[i+1]
-                break
             else:
-                self.state["ttc"]= [-1]
+                self.state["ttc"]=[i+np.argmin(new_mean)]
                 break
-                
+
