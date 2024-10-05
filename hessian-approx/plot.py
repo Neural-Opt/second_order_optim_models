@@ -78,8 +78,8 @@ class Plotter():
         ax.set_title(title)
 
 run = 1
-optim = ["AdaHutch","AdaBelief","Adam","AdaHessian"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
-path = "./runs/hessian-approx/20"
+optim = ["Adam","AdaHessian","Apollo","AdaBelief","SApollo"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
+path = "./results/hessian-approx/sapollo"
 l = Logger(rank="cuda", world_size=1, base_path=path)
 data = l.getData()
 p = Plotter(optim, data)
@@ -93,7 +93,7 @@ titles =["conv_layer_0","conv_layer_1","fc_layer_0","fc_layer_1"]
 legend_entries = {}
 
 for idx, (metric, title) in enumerate(zip(metrics, titles)):
-    p.setReducer(lambda x: (x[0][2*idx:2+2*idx][0]))
+    p.setReducer(lambda x: moving_average(x[0][2*idx:2+2*idx][1]))
 
    # p.setReducer(lambda x:  np.log((np.array(x))))
     print(metric)
@@ -109,8 +109,8 @@ fig = p.fig
 fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=2)
 
 plt.tight_layout(rect=[0, 0, 1, 0.95])  # Adjust the layout to make space for the legend
-plt.savefig('./results/hessian-approx/1028/cosine-sim/losses.png')
+plt.savefig('./results/hessian-approx/sapollo/approx_bias.png')
 import tikzplotlib
 
-#tikzplotlib.save("./results/hessian-approx/128/cosine-sim/bias-sim.tex")
-#plt.show()
+tikzplotlib.save('./results/hessian-approx/sapollo/approx_bias.tex')
+plt.show()

@@ -85,7 +85,7 @@ def eval_acc_mean():
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_acc():
-    runs_to_include = ['tinyimagenet-cosine']
+    runs_to_include = ['tinyimagenet-steplr']
     cols = [" "]+[f"{k} - Accuracy"for k in runs_to_include]
     rows = []
     run = "second-order-best"
@@ -102,10 +102,11 @@ def eval_acc():
     
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 def eval_convergence():
-    runs_to_include = ['tinyimagenet-cosine']
+    runs_to_include = ['tinyimagenet-steplr']
     cols = [" "]+[f"{k} - TTC"for k in runs_to_include]
     rows = []
     run = "second-order-best"
+
 
     for optim in optimizers:
         row = [optim]
@@ -119,5 +120,5 @@ def eval_convergence():
     print_table(cols,[f"Row{i}" for i in range(1,len(rows)+1)],rows)
 
 # Example usage
-eval_convergence()
+eval_acc()
 #print(eval_kpis())
