@@ -2,7 +2,7 @@ import unittest
 import numpy as np
 import sys
 import os
-sys.path.insert(0, '../')
+sys.path.insert(0, './')
 from utils.utils import MeanAggregator, VarianceAggregator
 
 class TestMeanAggregator(unittest.TestCase):
