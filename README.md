@@ -170,7 +170,7 @@ optim:
       weight_decay: 0.00025
 ```
 ### Usage
-Add you model to `models/demux.py` and then run your model with the respective configuration just do
+Add your model to `models/demux.py` and then run it with the respective configuration:
 ```bash
 python3 train.py 
 ```
