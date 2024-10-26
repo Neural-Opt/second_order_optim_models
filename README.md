@@ -6,7 +6,7 @@
 <div align="center">
    <img src="optim.gif" alt="Demo of the feature" width="500"/>
 </div>
-Second Order Optimization Models is a project designed to evaluate and experiment with advanced optimization algorithms, particularly those involving second-order methods. This repository includes implementations, benchmarks, and utilities to analyze performance and efficiency for various optimizers applied in machine learning contexts.
+Second Order Optimization is a bachelor thesis project, that is designed to evaluate and experiment with advanced optimization algorithms, particularly those involving second-order methods. This repository includes implementations, benchmarks, and utilities to analyze performance and efficiency for various optimizers applied in machine learning contexts.
 
 ## Table of Contents
 - [Features](#features)
@@ -170,7 +170,17 @@ optim:
       weight_decay: 0.00025
 ```
 ### Usage
-To run our model with the respective configuration just do
+Add you model to `models/demux.py` and then run your model with the respective configuration just do
 ```bash
 python3 train.py 
+```
+You will find the output for each optimizer in the `results` folder
+
+```bash root/
+├── results/
+│   ├── cifar10/
+│   │   ├── adam/
+│   │   │   └── benchmark.json     
+│   │   ├── adabelief/
+│   │   │   └── benchmark.json 
 ```
