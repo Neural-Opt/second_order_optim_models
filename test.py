@@ -42,8 +42,8 @@ class Plotter():
         ax.set_title(title)
 
 run = 1
-optim = ["AdamW","Adam","AdaBelief","Apollo","ApolloW","AdaHessian","SGD","RMSprop"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
-path = "./results/tinyimagenet-steplr/real-comp"
+optim = ["Apollo","ApolloW","SApolloW","Apollo2","ApolloW2"]#,"AdamW","SGD","AdaBelief","Apollo","ApolloW","AdaHessian","RMSprop"]
+path = "./results/cifar10-cosine/sapollo"
 l = Logger(rank="cuda", world_size=1, base_path=path)
 data = l.getData()
 print(data.keys(),)
@@ -82,9 +82,9 @@ print(legend_entries.keys())
 fig.legend(legend_entries.values(), legend_entries.keys(), loc='upper center', bbox_to_anchor=(0.5, 0.98), ncol=8,fontsize='large', handlelength=2)
 
 plt.tight_layout(rect=[0, 0, 1, 0.9])  # Adjust the layout to make space for the legend
-plt.savefig('./results/tinyimagenet-steplr/real-comp/second-order-best.png')
+plt.savefig('./results/cifar10-cosine/sapollo/second-order-best.png')
 plt.show()
 
 import tikzplotlib
 
-tikzplotlib.save("./results/tinyimagenet-steplr/real-comp/second-order-best.tex")
+tikzplotlib.save("./results/cifar10-cosine/sapollo/second-order-best.tex")

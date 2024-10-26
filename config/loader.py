@@ -48,7 +48,6 @@ def getOptim(exclude:list):
     params = getConfig()
     optim_params={}
     class_names = [i for i in params["optim"].keys() if i not in exclude]
-    
     class_names = class_names + [class_names.pop(class_names.index("AdaHessian"))] if "AdaHessian" in class_names else class_names
     instances = []
     for class_name in class_names:

@@ -178,17 +178,8 @@ class WMT14(BenchmarkSet):
             decoded_predictions = decoded_predictions + [self.tokenizer.decode(preds_batch.tolist(), skip_special_tokens=True) for preds_batch in preds]            
            # accuracy(correct/(mask.sum().item()))
 
-
-       # benchmark.add("acc_test",accuracy.get())
-
-        #print(f"\nREF: {decoded_references[4][0]}")
-        #print(f"PRED: {decoded_predictions[4]}")
-        #print(f"BLEU: {corpus_bleu([decoded_predictions[4]],[decoded_references[4]])}")
-
-       # sacre_bleu = corpus_bleu(decoded_predictions, decoded_references,use_effective_order=True)
         result = self.metric.compute(predictions=decoded_predictions, references=decoded_references, use_effective_order=True)
 
-        #print(f"Bleu: {sacre_bleu.score} ")
 
         for i in range(5):
             print(f"\nREF: {decoded_references[i][0]}")

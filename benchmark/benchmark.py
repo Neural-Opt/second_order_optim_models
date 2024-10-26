@@ -81,11 +81,3 @@ class Benchmark:
     def cleanUp():
             Benchmark._instance = None
 
-""" 
-values to track
-    time per step
-    epochs till convergence
-    train_set acc
-    test_set acc
-    memory consumtion
-"""
