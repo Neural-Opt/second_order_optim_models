@@ -4,15 +4,12 @@ import numpy as np
 class PostProcessor:
     def __init__(self,state:BenchmarkState) -> None:
         self.state = state
-        print(self.state.dump().keys())
         self.calcTTC()
     def calcTTC(self):
         data = self.state['train_loss']
         ref = data[0]/100
-       # diff = np.diff(data)
-        #std = np.std(diff)
+
         sigma = 5
-        print(data[0]/100,data[107:])
         old_mean = np.mean(data[len(data)-sigma:])
         for i in range(len(data)-sigma,0,-1):
             new_mean = np.mean(data[i:i+sigma])

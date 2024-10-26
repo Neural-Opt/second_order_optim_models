@@ -40,12 +40,6 @@ class VarianceAggregator:
         return np.var(self.measure_result)
     
 
-"""
-a = [q]
-b = [b]
-a = a.append(b)
-a == [[q],[b]]
-"""
 class BenchmarkAnalyzer:
     @staticmethod
     def getRunCount(dir):
@@ -56,7 +50,6 @@ class BenchmarkAnalyzer:
         state_collector = {key: [] for key in state_collector}
         state_collector["ttc"] = []
         for i in range(1,dirCount+1):
-            print(f"./results/{dir}/{i}/{optim}/benchmark.json")
 
             state = BenchmarkState(f"./results/{dir}/{i}/{optim}/benchmark.json")
             PostProcessor(state)        
@@ -71,7 +64,6 @@ class BenchmarkAnalyzer:
         if run==-1:
             concat = BenchmarkAnalyzer.getAllData(setName,BenchmarkAnalyzer.getRunCount(setName),optim=optim)
         else:
-            print(f"./results/{setName}/{run}/{optim}/benchmark.json")
             concat = BenchmarkState(f"./results/{setName}/{run}/{optim}/benchmark.json")
             PostProcessor(concat)     
             concat = {key : np.array(concat[key]) for key in concat.dump().keys()}
